@@ -1,4 +1,6 @@
 let hintBox;
+let currentAudio = null;
+let currentButton = null;
 
 function createHintBox() {
     hintBox = document.createElement('div');
@@ -13,11 +15,69 @@ function updateHints(suggestions) {
         console.log(item);
         const entry = document.createElement('div');
         entry.className = 'vk-hint-entry';
-        entry.innerHTML = `<strong>${item.description}</strong><br><small>${item.tags.join(', ')}</small>`;
+        var preview = getPreview(item)
+        var inner = 
+        `<div class="vk-hint-preview-container">${preview}</div>
+        <div class="vk-hint-text">
+            <strong>${item.description}</strong>
+            <small>${item.tags.join(', ')}</small>
+        </div>`
+        entry.innerHTML = inner;
         entry.onclick = () => attachMedia(item);
         hintBox.appendChild(entry);
     });
+    document.querySelectorAll(".vk-hint-preview-audio").forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    const src = btn.dataset.src;
+    e.stopPropagation();
+    // Останавливаем текущий проигрываемый
+    if (currentAudio && !currentAudio.paused) {
+      currentAudio.pause();
+      if (currentButton) currentButton.textContent = "▶️";
+    }
+
+    // Если это тот же файл — просто останавливаем
+    if (currentAudio && currentAudio.src === src && !currentAudio.paused) {
+      currentAudio = null;
+      currentButton = null;
+      return;
+    }
+
+    // Новый файл
+    currentAudio = new Audio(src);
+    currentButton = btn;
+    currentAudio.play();
+    btn.textContent = "⏸️";
+
+    currentAudio.addEventListener("ended", () => {
+      btn.textContent = "▶️";
+      currentAudio = null;
+      currentButton = null;
+    });
+  });
+});
 }
+
+// function createHint(media){
+//     const entry = document.createElement('div');
+//     entry.className = 'vk-hint-entry';
+
+// }
+
+
+
+function getPreview(media){
+    switch(media.mediaType){
+        case 'picture':
+            return `<img class="vk-hint-preview-img" src="${media.mediaUrl}&x=64&y=64&a=0"></img>`;
+        case 'voice':
+            return `<button class="vk-hint-preview-audio" data-src="${media.mediaUrl}">▶️</button>`;
+        default:
+            return ''
+    }
+}
+
+
 
 function getChatId(chatname){
     var chats = new Map([["(ред.)", "2000000039"]]);
@@ -41,7 +101,7 @@ function attachMedia(media) {
 
     switch(media.mediaType){
         case 'picture': 
-            fetch(media.mediaUrl)
+            fetch(media.mediaUrl+'&x=4096&y=4096&a=1')
                 .then(res => res.blob())
                 .then(blob => {
                     const file = new File([blob], "suggestion.webp", { type: blob.type });
@@ -78,7 +138,8 @@ function observeInput() {
 
     const observer = new MutationObserver(() => {
         const input = document.querySelector('[contenteditable]');
-        if (input) {
+        if (input && !input.dataset.hooked) {
+            input.dataset.hooked = 'true'; // пометка, чтобы не вешать повторно
             console.log('✅ Найдено поле!');
             input.addEventListener('input', async () => {
                 const text = input.innerText;
@@ -91,7 +152,6 @@ function observeInput() {
                     hintBox.innerHTML = '';
                 }
             });
-            observer.disconnect();
         }
     });
 
@@ -101,3 +161,4 @@ function observeInput() {
 
 createHintBox();
 observeInput();
+
