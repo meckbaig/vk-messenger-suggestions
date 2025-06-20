@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch WebExtension",
+            "type": "firefox",
+            "request": "launch",
+            "reAttach": true,
+            "addonPath": "${workspaceFolder}\\src",
+            "url": "https://vk.com/im/convo/2000000045?entrypoint=list_all"
+        }
+    ]
+}

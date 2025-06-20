@@ -1,23 +1,33 @@
 let hintBox;
+let previewBox;
 let currentAudio = null;
 let currentButton = null;
 
 function createHintBox() {
     hintBox = document.createElement('div');
     hintBox.id = 'vk-hint-box';
+
+    previewBox = document.createElement('div');
+    previewBox.id = 'vk-hint-hover-preview-container';
+    document.body.appendChild(previewBox);
     document.body.appendChild(hintBox);
 }
 
 function updateHints(suggestions) {
     hintBox.innerHTML = '';
+    if (suggestions === undefined || suggestions.length == 0) {
+        hintBox.style.display = 'none'
+        return
+    } 
     console.log(suggestions);
-    suggestions.forEach(item => {
+    hintBox.style.display = 'block'
+    suggestions.forEach(function (item) {
         console.log(item);
         const entry = document.createElement('div');
         entry.className = 'vk-hint-entry';
         var preview = getPreview(item)
-        var inner = 
-        `<div class="vk-hint-preview-container">${preview}</div>
+        var inner =
+            `<div class="vk-hint-preview-container">${preview}</div>
         <div class="vk-hint-text">
             <strong>${item.description}</strong>
             <small>${item.tags.join(', ')}</small>
@@ -27,35 +37,47 @@ function updateHints(suggestions) {
         hintBox.appendChild(entry);
     });
     document.querySelectorAll(".vk-hint-preview-audio").forEach(btn => {
-  btn.addEventListener("click", (e) => {
-    const src = btn.dataset.src;
-    e.stopPropagation();
-    // Останавливаем текущий проигрываемый
-    if (currentAudio && !currentAudio.paused) {
-      currentAudio.pause();
-      if (currentButton) currentButton.textContent = "▶️";
-    }
+        btn.addEventListener("click", (e) => {
+            const src = btn.dataset.src;
+            e.stopPropagation();
+            // Останавливаем текущий проигрываемый
+            if (currentAudio && !currentAudio.paused) {
+                currentAudio.pause();
+                if (currentButton) currentButton.textContent = "▶️";
+            }
 
-    // Если это тот же файл — просто останавливаем
-    if (currentAudio && currentAudio.src === src && !currentAudio.paused) {
-      currentAudio = null;
-      currentButton = null;
-      return;
-    }
+            // Если это тот же файл — просто останавливаем
+            if (currentAudio && currentAudio.src === src && !currentAudio.paused) {
+                currentAudio = null;
+                currentButton = null;
+                return;
+            }
 
-    // Новый файл
-    currentAudio = new Audio(src);
-    currentButton = btn;
-    currentAudio.play();
-    btn.textContent = "⏸️";
+            // Новый файл
+            currentAudio = new Audio(src);
+            currentButton = btn;
+            currentAudio.play();
+            btn.textContent = "⏸️";
 
-    currentAudio.addEventListener("ended", () => {
-      btn.textContent = "▶️";
-      currentAudio = null;
-      currentButton = null;
+            currentAudio.addEventListener("ended", () => {
+                btn.textContent = "▶️";
+                currentAudio = null;
+                currentButton = null;
+            });
+        });
     });
-  });
-});
+
+    document.querySelectorAll(".vk-hint-preview-img").forEach(img => {
+        img.addEventListener("mouseenter", () => {
+            const src = img.src;
+            previewBox.innerHTML = `<img src="${src}&x=256&y=256&a=0" alt="preview">`;
+            previewBox.style.display = 'block';
+        });
+        img.addEventListener('mouseleave', () => {
+            previewBox.style.display = 'none';
+            previewBox.innerHTML = '';
+        });
+    });
 }
 
 // function createHint(media){
@@ -66,8 +88,8 @@ function updateHints(suggestions) {
 
 
 
-function getPreview(media){
-    switch(media.mediaType){
+function getPreview(media) {
+    switch (media.mediaType) {
         case 'picture':
             return `<img class="vk-hint-preview-img" src="${media.mediaUrl}&x=64&y=64&a=0"></img>`;
         case 'voice':
@@ -79,7 +101,7 @@ function getPreview(media){
 
 
 
-function getChatId(chatname){
+function getChatId(chatname) {
     var chats = new Map([["(ред.)", "2000000039"]]);
     return chats.get(chatname);
 }
@@ -91,17 +113,12 @@ function attachMedia(media) {
     const input = document.querySelector('[contenteditable]');
     if (!input) return;
 
-    // Вставка описания или ссылки
-
-    //input.focus();
-    //input.value = media;
-
     input.focus();
     input.innerText = '';
 
-    switch(media.mediaType){
-        case 'picture': 
-            fetch(media.mediaUrl+'&x=4096&y=4096&a=1')
+    switch (media.mediaType) {
+        case 'picture':
+            fetch(media.mediaUrl + '&x=4096&y=4096&a=1')
                 .then(res => res.blob())
                 .then(blob => {
                     const file = new File([blob], "suggestion.webp", { type: blob.type });
@@ -122,14 +139,11 @@ function attachMedia(media) {
                 });
             break;
         case 'voice':
-            const messageLink = 'https://vk.com/im/convo/'+ getChatId(media.messageLocation.dialogId) +'?cmid='+ media.messageLocation.messageId +'&entrypoint=go_to_source_message';
-            window.open(messageLink)
+            const messageLink = 'https://vk.com/im/convo/' + getChatId(media.messageLocation.dialogId) + '?cmid=' + media.messageLocation.messageId + '&entrypoint=go_to_source_message';
+            window.open(messageLink);
             break;
     }
-
-    
-
-    
+    updateHints()
 }
 
 function observeInput() {
@@ -145,11 +159,13 @@ function observeInput() {
                 const text = input.innerText;
                 if (text.length > 2) {
                     console.log(text);
-                    const response = await fetch("url" + encodeURIComponent(text));
+                    const address = "url" + encodeURIComponent(text)
+                    const response = await fetch(address);
                     const json = await response.json();
                     updateHints(json.items);
                 } else {
                     hintBox.innerHTML = '';
+                    hintBox.style.display = 'none'
                 }
             });
         }
