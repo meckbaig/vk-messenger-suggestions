@@ -71,7 +71,7 @@ function updateHints(suggestions) {
     document.querySelectorAll(".vk-hint-preview-img").forEach(img => {
         img.addEventListener("mouseenter", () => {
             const src = img.src;
-            previewBox.innerHTML = `<img src="${src}&x=256&y=256&a=0" alt="preview">`;
+            previewBox.innerHTML = `<img src="${src}&x=256&y=256&a=1" alt="preview">`;
             previewBox.style.display = 'block';
         });
         img.addEventListener('mouseleave', () => {
