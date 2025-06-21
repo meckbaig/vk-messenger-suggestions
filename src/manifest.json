@@ -7,7 +7,7 @@
   "content_scripts": [
     {
       "matches": ["https://*.vk.com/*","https://vk.com/*"],
-      "js": ["content.js"],
+      "js": ["config.js", "content.js"],
       "css": ["style.css"]
     }
   ],

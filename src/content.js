@@ -23,10 +23,10 @@ async function loadChatMappings() {
 
 function createHintBox() {
     hintBox = document.createElement('div');
-    hintBox.id = 'vk-hint-box';
+    hintBox.id = CONFIG.ELEMENTS.HINT_BOX;
 
     previewBox = document.createElement('div');
-    previewBox.id = 'vk-hint-hover-preview-container';
+    previewBox.id = CONFIG.ELEMENTS.PREVIEW_BOX;
     document.body.appendChild(previewBox);
     document.body.appendChild(hintBox);
 }
@@ -42,11 +42,11 @@ function updateHints(suggestions) {
     suggestions.forEach(function (item) {
         console.log(item);
         const entry = document.createElement('div');
-        entry.className = 'vk-hint-entry';
+        entry.className = CONFIG.CLASSES.HINT_ENTRY;
         var preview = getPreview(item)
         var inner =
-            `<div class="vk-hint-preview-container">${preview}</div>
-        <div class="vk-hint-text">
+            `<div class="${CONFIG.CLASSES.HINT_PREVIEW_CONTAINER}">${preview}</div>
+        <div class="${CONFIG.CLASSES.HINT_TEXT}">
             <strong>${item.description}</strong>
             <small>${item.tags.join(', ')}</small>
         </div>`
@@ -54,7 +54,7 @@ function updateHints(suggestions) {
         entry.onclick = () => attachMedia(item);
         hintBox.appendChild(entry);
     });
-    document.querySelectorAll(".vk-hint-preview-audio").forEach(btn => {
+    document.querySelectorAll("." + CONFIG.CLASSES.HINT_PREVIEW_AUDIO).forEach(btn => {
         btn.addEventListener("click", (e) => {
             const src = btn.dataset.src;
             e.stopPropagation();
@@ -85,10 +85,10 @@ function updateHints(suggestions) {
         });
     });
 
-    document.querySelectorAll(".vk-hint-preview-img").forEach(img => {
+    document.querySelectorAll("." + CONFIG.CLASSES.HINT_PREVIEW_IMG).forEach(img => {
         img.addEventListener("mouseenter", () => {
             const src = img.src;
-            previewBox.innerHTML = `<img src="${src}&x=256&y=256&a=1" alt="preview">`;
+            previewBox.innerHTML = `<img src="${src}&x=256&y=256&a=0" alt="preview">`;
             previewBox.style.display = 'block';
         });
         img.addEventListener('mouseleave', () => {
@@ -98,35 +98,22 @@ function updateHints(suggestions) {
     });
 }
 
-// function createHint(media){
-//     const entry = document.createElement('div');
-//     entry.className = 'vk-hint-entry';
-
-// }
-
-
-
 function getPreview(media) {
     switch (media.mediaType) {
         case 'picture':
-            return `<img class="vk-hint-preview-img" src="${media.mediaUrl}&x=64&y=64&a=0"></img>`;
+            return `<img class="${CONFIG.CLASSES.HINT_PREVIEW_IMG}" src="${media.mediaUrl}${CONFIG.IMAGES.PREVIEW_PARAMS}"></img>`;
         case 'voice':
-            return `<button class="vk-hint-preview-audio" data-src="${media.mediaUrl}">▶️</button>`;
+            return `<button class="${CONFIG.CLASSES.HINT_PREVIEW_AUDIO}" data-src="${media.mediaUrl}">▶️</button>`;
         default:
             return ''
     }
 }
 
-
-
 function getChatId(chatname) {
     return chatMappings[chatname] || null;
 }
 
-
 function attachMedia(media) {
-    //const input = document.querySelector('textarea[name="message"]'); 
-    //const textField = document.querySelector('div.uMailWrite__textareaGhost');
     const input = document.querySelector('[contenteditable]');
     if (!input) return;
 
@@ -135,7 +122,7 @@ function attachMedia(media) {
 
     switch (media.mediaType) {
         case 'picture':
-            fetch(media.mediaUrl + '&x=4096&y=4096&a=1')
+            fetch(media.mediaUrl + CONFIG.IMAGES.FULL_PARAMS)
                 .then(res => res.blob())
                 .then(blob => {
                     const file = new File([blob], "suggestion.webp", { type: blob.type });
@@ -178,33 +165,33 @@ function showMappingPopup(dialogId) {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: white;
-        border: 2px solid #4a76a8;
+        background: ${CONFIG.COLORS.BACKGROUND};
+        border: 2px solid ${CONFIG.COLORS.PRIMARY};
         border-radius: 8px;
         padding: 20px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        z-index: 10000;
-        max-width: 400px;
+        z-index: ${CONFIG.POPUP.Z_INDEX};
+        max-width: ${CONFIG.POPUP.MAX_WIDTH};
         text-align: center;
         font-family: Arial, sans-serif;
     `;
     
     popup.innerHTML = `
-        <h3 style="margin: 0 0 15px 0; color: #4a76a8;">Настройка маппинга</h3>
-        <p style="margin: 0 0 20px 0; line-height: 1.4; color: #666;">
-            Добавьте маппинг на беседу <strong>"${dialogId}"</strong> в настройках расширения.
+        <h3 style="margin: 0 0 15px 0; color: ${CONFIG.COLORS.PRIMARY};">${CONFIG.MESSAGES.POPUP_TITLE}</h3>
+        <p style="margin: 0 0 20px 0; line-height: 1.4; color: ${CONFIG.COLORS.TEXT_SECONDARY};">
+            ${CONFIG.MESSAGES.MAPPING_REQUIRED} <strong>"${dialogId}"</strong> в настройках расширения.
         </p>
-        <p style="margin: 0 0 20px 0; font-size: 12px; color: #666;">
-            Откройте popup расширения и добавьте новый маппинг.
+        <p style="margin: 0 0 20px 0; font-size: 12px; color: ${CONFIG.COLORS.TEXT_SECONDARY};">
+            ${CONFIG.MESSAGES.MAPPING_INSTRUCTIONS}
         </p>
         <button id="closePopup" style="
-            background: #4a76a8;
+            background: ${CONFIG.COLORS.PRIMARY};
             color: white;
             border: none;
             padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
-        ">Понятно</button>
+        ">${CONFIG.MESSAGES.BUTTON_UNDERSTAND}</button>
     `;
     
     document.body.appendChild(popup);
@@ -226,13 +213,10 @@ function showMappingPopup(dialogId) {
         if (document.body.contains(popup)) {
             document.body.removeChild(popup);
         }
-    }, 10000);
+    }, CONFIG.POPUP.AUTO_CLOSE_DELAY);
 }
 
 function observeInput() {
-    //const input = document.querySelector('textarea[name="message"]');
-    //const textField = document.querySelector('div.uMailWrite__textareaGhost');
-
     const observer = new MutationObserver(() => {
         const input = document.querySelector('[contenteditable]');
         if (input && !input.dataset.hooked) {
@@ -246,17 +230,16 @@ function observeInput() {
                     clearTimeout(debounceTimer);
                 }
                 
-                if (text.length > 2) {
+                if (text.length > CONFIG.SEARCH.MIN_LENGTH - 1 && text.length <= CONFIG.SEARCH.MAX_LENGTH) {
                     // Устанавливаем новый таймер
                     debounceTimer = setTimeout(async () => {
                         console.log(text);
-                    const address = "url" + encodeURIComponent(text)
+                        const address = CONFIG.API.BASE_URL + encodeURIComponent(text)
                         const response = await fetch(address);
                         const json = await response.json();
                         updateHints(json.items);
-                    }, 200);
+                    }, CONFIG.DEBOUNCE.DELAY);
                 } else {
-                    // Если текст короткий, сразу скрываем подсказки
                     hintBox.innerHTML = '';
                     hintBox.style.display = 'none'
                 }
@@ -265,7 +248,6 @@ function observeInput() {
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
-
 }
 
 // Слушатель изменений в хранилище
