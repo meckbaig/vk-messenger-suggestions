@@ -2,6 +2,7 @@ let hintBox;
 let previewBox;
 let currentAudio = null;
 let currentButton = null;
+let debounceTimer = null;
 
 function createHintBox() {
     hintBox = document.createElement('div');
@@ -157,13 +158,23 @@ function observeInput() {
             console.log('✅ Найдено поле!');
             input.addEventListener('input', async () => {
                 const text = input.innerText;
+                
+                // Очищаем предыдущий таймер
+                if (debounceTimer) {
+                    clearTimeout(debounceTimer);
+                }
+                
                 if (text.length > 2) {
+                    // Устанавливаем новый таймер
+                    debounceTimer = setTimeout(async () => {
                     console.log(text);
                     const address = "url" + encodeURIComponent(text)
                     const response = await fetch(address);
                     const json = await response.json();
                     updateHints(json.items);
+                    }, 200);
                 } else {
+                    // Если текст короткий, сразу скрываем подсказки
                     hintBox.innerHTML = '';
                     hintBox.style.display = 'none'
                 }
