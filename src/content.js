@@ -161,38 +161,13 @@ function attachMedia(media) {
 function showMappingPopup(dialogId) {
     // Создаем popup элемент
     const popup = document.createElement('div');
-    popup.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: ${CONFIG.COLORS.BACKGROUND};
-        border: 2px solid ${CONFIG.COLORS.PRIMARY};
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        z-index: ${CONFIG.POPUP.Z_INDEX};
-        max-width: ${CONFIG.POPUP.MAX_WIDTH};
-        text-align: center;
-        font-family: Arial, sans-serif;
-    `;
+    popup.id = CONFIG.ELEMENTS.POPUP;
     
     popup.innerHTML = `
-        <h3 style="margin: 0 0 15px 0; color: ${CONFIG.COLORS.PRIMARY};">${CONFIG.MESSAGES.POPUP_TITLE}</h3>
-        <p style="margin: 0 0 20px 0; line-height: 1.4; color: ${CONFIG.COLORS.TEXT_SECONDARY};">
-            ${CONFIG.MESSAGES.MAPPING_REQUIRED} <strong>"${dialogId}"</strong> в настройках расширения.
-        </p>
-        <p style="margin: 0 0 20px 0; font-size: 12px; color: ${CONFIG.COLORS.TEXT_SECONDARY};">
-            ${CONFIG.MESSAGES.MAPPING_INSTRUCTIONS}
-        </p>
-        <button id="closePopup" style="
-            background: ${CONFIG.COLORS.PRIMARY};
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        ">${CONFIG.MESSAGES.BUTTON_UNDERSTAND}</button>
+        <h3>${CONFIG.MESSAGES.POPUP_TITLE}</h3>
+        <p>${CONFIG.MESSAGES.MAPPING_REQUIRED} <strong>"${dialogId}"</strong> в настройках расширения.</p>
+        <p>${CONFIG.MESSAGES.MAPPING_INSTRUCTIONS}</p>
+        <button id="closePopup">${CONFIG.MESSAGES.BUTTON_UNDERSTAND}</button>
     `;
     
     document.body.appendChild(popup);
@@ -265,4 +240,3 @@ createHintBox();
 loadChatMappings();
 setupStorageListener();
 observeInput();
-

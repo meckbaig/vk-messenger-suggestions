@@ -45,17 +45,44 @@ const CONFIG = {
     // ID элементов
     ELEMENTS: {
         HINT_BOX: 'vk-hint-box',
-        PREVIEW_BOX: 'vk-hint-hover-preview-container'
+        PREVIEW_BOX: 'vk-hint-hover-preview-container',
+        POPUP: 'vk-hint-popup'
     },
     
     // Цвета (в стиле ВКонтакте)
-    COLORS: {
+    COLORS_LIGHT: {
         PRIMARY: '#4a76a8',
         SECONDARY: '#6c757d',
         TEXT_PRIMARY: '#333',
         TEXT_SECONDARY: '#666',
+        TEXT_MUTED: '#777',
         BORDER: '#ddd',
-        BACKGROUND: '#fff'
+        BORDER_LIGHT: '#eee',
+        BACKGROUND: '#fff',
+        BACKGROUND_HOVER: '#f0f0f0',
+        SHADOW: 'rgba(0,0,0,0.3)',
+        SHADOW_LIGHT: 'rgba(0,0,0,0.1)',
+        SUCCESS: '#28a745',
+        WARNING: '#ffc107',
+        ERROR: '#dc3545'
+    },
+
+    // URL// Цвета (в стиле ВКонтакте)
+    COLORS_DARK: {
+        PRIMARY: '#4a76a8',
+        SECONDARY: '#6c757d',
+        TEXT_PRIMARY: '#fff',
+        TEXT_SECONDARY: '#828282',
+        TEXT_MUTED: '#777',
+        BORDER: '#363738',
+        BORDER_LIGHT: '#eee',
+        BACKGROUND: '#222222',
+        BACKGROUND_HOVER: '#262626',
+        SHADOW: 'rgba(0,0,0,0.3)',
+        SHADOW_LIGHT: 'rgba(0,0,0,0.1)',
+        SUCCESS: '#28a745',
+        WARNING: '#ffc107',
+        ERROR: '#dc3545'
     },
     
     // Сообщения
@@ -67,9 +94,25 @@ const CONFIG = {
     }
 };
 
+CONFIG.COLORS = CONFIG.COLORS_DARK;
+
 // Экспорт для использования в других файлах
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = CONFIG;
 } else {
     window.CONFIG = CONFIG;
 } 
+
+// Загрузка css переменных
+function loadCssVariables() {
+    const root = document.documentElement;
+    Object.entries(CONFIG.COLORS).forEach(([key, value]) => {
+        const cssVarName = `--vk-color-${key.toLowerCase().replace('_', '-')}`;
+        root.style.setProperty(cssVarName, value);
+    });
+
+    root.style.setProperty('--vk-popup-z-index', CONFIG.POPUP.Z_INDEX);
+    root.style.setProperty('--vk-popup-max-width', CONFIG.POPUP.MAX_WIDTH);
+}
+
+loadCssVariables();
