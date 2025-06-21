@@ -41,6 +41,42 @@ document.getElementById("addChat").addEventListener("click", () => {
   document.getElementById("chatId").value = "";
 });
 
+
+
+document.getElementById("getChat").addEventListener("click", async () => {
+    try {
+      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+      // Выполняем скрипт на странице для получения данных
+      const results = await browser.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => {
+              const url = window.location.href;
+              const titleElement = document.querySelector('.ConvoTitle__title h2');
+              const chatName = titleElement ? titleElement.textContent.trim() : null;
+              
+              // Извлекаем ID из URL
+              const match = url.match(/\/convo\/(\d+)/);
+              const chatId = match ? match[1] : null;
+              
+              return { chatName, chatId, url };
+          }
+      });
+      
+      const result = results[0].result;
+      
+      if (result.chatId && result.chatName) {
+          addChatMapping(result.chatName, result.chatId);
+          console.log(`Добавлен чат: ${result.chatName} (ID: ${result.chatId})`);
+      } else {
+          alert('Не удалось получить данные чата. Убедитесь, что вы находитесь на странице беседы ВКонтакте.');
+      }
+        
+    } catch (error) {
+        console.error('Ошибка при получении данных чата:', error);
+        alert('Произошла ошибка при получении данных чата.');
+    }
+});
+
 // Функция добавления маппинга чата
 function addChatMapping(chatName, chatId) {
   browser.storage.local.get(['chatMappings']).then((result) => {
@@ -102,9 +138,9 @@ document.getElementById("run").addEventListener("click", () => {
   console.log("[VK-HINT] Нажата кнопка в popup");
 
   browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    browser.tabs.executeScript(tabs[0].id, {
-      code: 
-        'alert("Привет из popup.js!");'
+    browser.scripting.executeScript({
+      target: { tabId: tabs[0].id },
+      files: ['content.js']
     });
   });
 });
