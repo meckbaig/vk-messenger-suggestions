@@ -1,8 +1,25 @@
+// Полифилл для совместимости с Chromium
+if (typeof browser === 'undefined') {
+    window.browser = chrome;
+}
+
 let hintBox;
 let previewBox;
 let currentAudio = null;
 let currentButton = null;
 let debounceTimer = null;
+let chatMappings = {};
+
+async function loadChatMappings() {
+    try {
+        const result = await browser.storage.local.get(['chatMappings']);
+        chatMappings = result.chatMappings || {};
+        console.log('Загружены маппинги чатов:', chatMappings);
+    } catch (error) {
+        console.error('Ошибка загрузки маппингов чатов:', error);
+        chatMappings = {};
+    }
+}
 
 function createHintBox() {
     hintBox = document.createElement('div');
@@ -103,8 +120,7 @@ function getPreview(media) {
 
 
 function getChatId(chatname) {
-    var chats = new Map([["(ред.)", "2000000039"]]);
-    return chats.get(chatname);
+    return chatMappings[chatname] || null;
 }
 
 
@@ -140,11 +156,77 @@ function attachMedia(media) {
                 });
             break;
         case 'voice':
-            const messageLink = 'https://vk.com/im/convo/' + getChatId(media.messageLocation.dialogId) + '?cmid=' + media.messageLocation.messageId + '&entrypoint=go_to_source_message';
-            window.open(messageLink);
+            const chatId = getChatId(media.messageLocation.dialogId);
+            if (chatId) {
+                const messageLink = 'https://vk.com/im/convo/' + chatId + '?cmid=' + media.messageLocation.messageId + '&entrypoint=go_to_source_message';
+                window.open(messageLink);
+            } else {
+                // Показываем popup с сообщением о необходимости добавить маппинг
+                showMappingPopup(media.messageLocation.dialogId);
+            }
             break;
     }
     updateHints()
+}
+
+// Функция для показа popup с сообщением о маппинге
+function showMappingPopup(dialogId) {
+    // Создаем popup элемент
+    const popup = document.createElement('div');
+    popup.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border: 2px solid #4a76a8;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        z-index: 10000;
+        max-width: 400px;
+        text-align: center;
+        font-family: Arial, sans-serif;
+    `;
+    
+    popup.innerHTML = `
+        <h3 style="margin: 0 0 15px 0; color: #4a76a8;">Настройка маппинга</h3>
+        <p style="margin: 0 0 20px 0; line-height: 1.4; color: #666;">
+            Добавьте маппинг на беседу <strong>"${dialogId}"</strong> в настройках расширения.
+        </p>
+        <p style="margin: 0 0 20px 0; font-size: 12px; color: #666;">
+            Откройте popup расширения и добавьте новый маппинг.
+        </p>
+        <button id="closePopup" style="
+            background: #4a76a8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        ">Понятно</button>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    // Обработчик кнопки закрытия
+    popup.querySelector('#closePopup').addEventListener('click', () => {
+        document.body.removeChild(popup);
+    });
+    
+    // Закрытие по клику вне popup
+    popup.addEventListener('click', (e) => {
+        if (e.target === popup) {
+            document.body.removeChild(popup);
+        }
+    });
+    
+    // Автоматическое закрытие через 10 секунд
+    setTimeout(() => {
+        if (document.body.contains(popup)) {
+            document.body.removeChild(popup);
+        }
+    }, 10000);
 }
 
 function observeInput() {
@@ -167,11 +249,11 @@ function observeInput() {
                 if (text.length > 2) {
                     // Устанавливаем новый таймер
                     debounceTimer = setTimeout(async () => {
-                    console.log(text);
+                        console.log(text);
                     const address = "url" + encodeURIComponent(text)
-                    const response = await fetch(address);
-                    const json = await response.json();
-                    updateHints(json.items);
+                        const response = await fetch(address);
+                        const json = await response.json();
+                        updateHints(json.items);
                     }, 200);
                 } else {
                     // Если текст короткий, сразу скрываем подсказки
@@ -186,6 +268,18 @@ function observeInput() {
 
 }
 
+// Слушатель изменений в хранилище
+function setupStorageListener() {
+    browser.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && changes.chatMappings) {
+            chatMappings = changes.chatMappings.newValue || {};
+            console.log('Маппинги чатов обновлены:', chatMappings);
+        }
+    });
+}
+
 createHintBox();
+loadChatMappings();
+setupStorageListener();
 observeInput();
 

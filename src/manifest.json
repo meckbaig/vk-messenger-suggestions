@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "VK Messenger Suggestions",
   "version": "1.0",
-  "permissions": ["scripting", "activeTab"],
+  "permissions": ["scripting", "activeTab", "storage"],
   "host_permissions": ["https://*.vk.com/*","https://vk.com/*"],
   "content_scripts": [
     {
