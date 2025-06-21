@@ -62,6 +62,7 @@ function updateHints(suggestions) {
             if (currentAudio && !currentAudio.paused) {
                 currentAudio.pause();
                 if (currentButton) currentButton.textContent = "▶️";
+                return;
             }
 
             // Если это тот же файл — просто останавливаем
