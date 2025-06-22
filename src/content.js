@@ -31,11 +31,26 @@ function createHintBox() {
     document.body.appendChild(hintBox);
 }
 
+function hideHintBox() {
+    if (hintBox) {
+        hintBox.innerHTML = '';
+        hintBox.style.display = 'none'
+    }
+}
+
+function hidePreviewBox() {
+    if (previewBox) {
+        previewBox.style.display = 'none';
+        previewBox.innerHTML = '';
+    }
+}
+
 function updateHints(suggestions) {
     hintBox.innerHTML = '';
     if (suggestions === undefined || suggestions.length == 0) {
-        hintBox.style.display = 'none'
-        return
+        hideHintBox();
+        hidePreviewBox();
+        return;
     } 
     console.log(suggestions);
     hintBox.style.display = 'block'
@@ -93,8 +108,7 @@ function updateHints(suggestions) {
             previewBox.style.display = 'block';
         });
         img.addEventListener('mouseleave', () => {
-            previewBox.style.display = 'none';
-            previewBox.innerHTML = '';
+            hidePreviewBox()
         });
     });
 }
@@ -216,8 +230,7 @@ function observeInput() {
                         updateHints(json.items);
                     }, CONFIG.DEBOUNCE.DELAY);
                 } else {
-                    hintBox.innerHTML = '';
-                    hintBox.style.display = 'none'
+                    hideHintBox()
                 }
             });
         }
