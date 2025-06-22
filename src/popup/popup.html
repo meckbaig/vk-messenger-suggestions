@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VK Hint</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      width: 400px;
+      background: #f5f5f5;
+    }
+    
+    .header {
+      background: #4a76a8;
+      color: white;
+      padding: 5px;
+      text-align: center;
+      margin-bottom: 0;
+    }
+    
+    .tabs {
+      display: flex;
+      background: white;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      background: white;
+      color: #666;
+      transition: all 0.3s;
+    }
+    
+    .tab.active {
+      background: #4a76a8;
+      color: white;
+    }
+    
+    .tab:hover:not(.active) {
+      background: #f0f0f0;
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 20px;
+      background: white;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    button {
+      padding: 8px 16px;
+      background: #4a76a8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+    
+    button:hover {
+      background: #3a5a8a;
+    }
+    
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #4a76a8;
+    }
+    
+    .chat-mapping {
+      margin: 15px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f9f9f9;
+    }
+    
+    .chat-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      padding: 10px;
+      margin: 10px 0;
+      background: white;
+    }
+    
+    .chat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .chat-item:last-child {
+      border-bottom: none;
+    }
+    
+    .remove-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .remove-btn:hover {
+      background: #c0392b;
+    }
+    
+    .media-form {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+    
+    .tags-input {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 5px;
+    }
+    
+    .tag {
+      background: #4a76a8;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .tag-remove {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .file-input {
+      opacity: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    
+    .file-input-label {
+      display: block;
+      padding: 10px;
+      border: 2px dashed #ddd;
+      border-radius: 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+    
+    .file-input-label:hover {
+      border-color: #4a76a8;
+    }
+    
+    .file-input-label.has-file {
+      border-color: #4a76a8;
+      background: #f0f8ff;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    .get-button {
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 4px 8px;
+      margin-left: 5px;
+    }
+    
+    .get-button:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h3>VK Hint</h3>
+    <p style="margin: 0; font-size: 12px;">Расширение для подсказок в ВКонтакте</p>
+  </div>
+  
+  <div class="tabs">
+    <button class="tab active" data-tab="chats">Чаты</button>
+    <button class="tab" data-tab="media">Медиафайлы</button>
+  </div>
+  
+  <!-- Вкладка управления чатами -->
+  <div id="chats-tab" class="tab-content active">
+    <h4>Настройка маппинга чатов</h4>
+    <div class="chat-mapping">
+      <div class="form-group">
+        <label for="chatName">Название чата:</label>
+        <input type="text" id="chatName" placeholder="Например: Моя группа">
+      </div>
+      <div class="form-group">
+        <label for="chatId">ID чата:</label>
+        <input type="text" id="chatId" placeholder="Например: 2000000039">
+      </div>
+      <button id="addChat">Добавить чат</button>
+      <button id="getChat">Получить чат</button>
+    </div>
+
+    <h4>Сохраненные чаты:</h4>
+    <div id="chatList" class="chat-list">
+      <!-- Здесь будут отображаться сохраненные чаты -->
+    </div>
+  </div>
+  
+  <!-- Вкладка добавления медиафайлов -->
+  <div id="media-tab" class="tab-content">
+    <h4>Добавление медиафайлов</h4>
+    <div class="media-form">
+      <div class="form-group">
+        <label for="mediaType">Тип медиа:</label>
+        <select id="mediaType">
+          <option value="voice">Голосовое сообщение</option>
+          <option value="picture">Изображение</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="mediaUrl">URL медиафайла:</label>
+        <input type="url" id="mediaUrl" placeholder="https://example.com/media/file.mp3">
+      </div>
+      
+      <div class="form-group">
+        <label for="description">Описание:</label>
+        <textarea id="description" rows="3" placeholder="Описание медиафайла"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="dialogId">ID диалога:</label>
+        <input type="text" id="dialogId" placeholder="ID диалога">
+        <button id="getDialog" class="get-button">Get</button>
+      </div>
+      
+      <div class="form-group">
+        <label for="messageId">ID сообщения:</label>
+        <input type="text" id="messageId" placeholder="ID сообщения">
+        <button id="getMessage" class="get-button">Get</button>
+      </div>
+      
+      <div class="form-group">
+        <label for="tags">Теги (через запятую):</label>
+        <input type="text" id="tags" placeholder="тег1, тег2, тег3">
+        <div id="tagsContainer" class="tags-input"></div>
+      </div>
+      
+      <button id="addMedia">Добавить медиафайл</button>
+    </div>
+    
+    <div id="status" class="status" style="display: none;"></div>
+  </div>
+
+  <script src="../config.js"></script>
+  <script src="media.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

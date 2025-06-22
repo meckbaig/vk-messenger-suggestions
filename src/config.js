@@ -4,6 +4,7 @@ const CONFIG = {
     // API настройки
     API: {
         BASE_URL: "url",
+        MEDIA_URL: "url",
         CLIENT: "vk"
     },
     
@@ -102,6 +103,7 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.CONFIG = CONFIG;
 } 
+
 
 // Загрузка css переменных
 function loadCssVariables() {
