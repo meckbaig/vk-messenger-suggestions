@@ -61,10 +61,10 @@ function updateHints(suggestions) {
         var preview = getPreview(item)
         var inner =
             `<div class="${CONFIG.CLASSES.HINT_PREVIEW_CONTAINER}">${preview}</div>
-        <div class="${CONFIG.CLASSES.HINT_TEXT}">
-            <strong>${item.description}</strong>
-            <small>${item.tags.join(', ')}</small>
-        </div>`
+                <div class="${CONFIG.CLASSES.HINT_TEXT}">
+                <strong>${item.description}</strong>
+                <small>${item.tags.join(', ')}</small>
+            </div>`
         entry.innerHTML = inner;
         entry.onclick = () => attachMedia(item);
         hintBox.appendChild(entry);
@@ -91,7 +91,7 @@ function updateHints(suggestions) {
             currentAudio = new Audio(src);
             currentButton = btn;
             currentAudio.play();
-            btn.textContent = "⏸️";
+            btn.textContent = "⏹️";
 
             currentAudio.addEventListener("ended", () => {
                 btn.textContent = "▶️";
