@@ -68,7 +68,7 @@ async function getMessageData() {
         // Ищем ID сообщения  в элементах страницы
         const messageElements = document
             .querySelector('.ConvoHistory__messageBlockSelected--withoutBubbles')
-            .closest('.VirtualScrollItem');
+            ?.closest('.VirtualScrollItem');
         if (!messageElements) {
           return { messageId: null };
         }

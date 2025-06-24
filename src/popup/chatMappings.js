@@ -50,7 +50,7 @@ function setupChatMappingsForm() {
                     const chatId = match ? match[1] : null;
 
                     return { chatName, chatId, url };
-                }
+                }   
             });
 
             const result = results[0].result;
