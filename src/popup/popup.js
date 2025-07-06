@@ -11,6 +11,27 @@ document.addEventListener('DOMContentLoaded', () => {
     window.chatMappingsModule.setupChatMappingsForm();
   }
 
+  // === Обработка переключателя включения/выключения расширения ===
+  const toggle = document.getElementById('extensionToggle');
+  if (toggle) {
+    // Загрузка состояния
+    if (window.browser && browser.storage && browser.storage.local) {
+      browser.storage.local.get(['extensionEnabled'], (result) => {
+        toggle.checked = result.extensionEnabled !== false;
+      });
+    } 
+
+    toggle.addEventListener('change', () => {
+      const enabled = toggle.checked;
+      if (window.browser && browser.storage && browser.storage.local) {
+        browser.storage.local.set({ extensionEnabled: enabled });
+      } 
+      showStatus(enabled ? 'Функциональность включена' : 'Функциональность выключена', enabled ? 'success' : 'error');
+    });
+  }
+  document.getElementById("authVk").addEventListener("click", () => {
+    browser.runtime.sendMessage({ action: "start-auth" });
+  });
 });
 
 // Настройка вкладок
@@ -18,10 +39,29 @@ function setupTabs() {
   const tabs = document.querySelectorAll('.tab');
   const tabContents = document.querySelectorAll('.tab-content');
   
+  // Проверяем авторизацию для media
+
+  let isAuthorized = false;
+  browser.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.vkUserId) {
+      isAuthorized = changes.vkUserId.newValue !== undefined;
+      if (!isAuthorized) {
+        const mediaTab = document.querySelector('.tab[data-tab="media"]');
+        if (mediaTab) {
+          mediaTab.classList.add('disabled');
+        }
+      }
+    }
+  });
+
   tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
+    tab.addEventListener('click', (e) => {
       const targetTab = tab.dataset.tab;
-      
+      if (targetTab === 'media' && !isAuthorized) {
+        showStatus('Авторизуйтесь через VK для доступа к медиафайлам', 'error');
+        e.preventDefault();
+        return;
+      }
       // Убираем активный класс со всех вкладок и контента
       tabs.forEach(t => t.classList.remove('active'));
       tabContents.forEach(content => content.classList.remove('active'));

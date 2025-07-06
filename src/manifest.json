@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "VK Messenger Suggestions",
   "version": "1.0",
-  "permissions": ["scripting", "activeTab", "storage"],
+  "permissions": ["scripting", "activeTab", "storage","identity"],
   "host_permissions": ["https://*.vk.com/*","https://vk.com/*"],
   "content_scripts": [
     {
@@ -11,6 +11,9 @@
       "css": ["style.css"]
     }
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": "icon.png"
