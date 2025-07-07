@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.chatMappingsModule) {
     window.chatMappingsModule.setupChatMappingsForm();
   }
+  if (window.settingsModule) {
+    window.settingsModule.setupSettingsForm();
+  }
   // === Обработка переключателя включения/выключения расширения ===
   const toggle = document.getElementById('extensionToggle');
   const toggleContainer = document.getElementById('extensionToggleContainer');

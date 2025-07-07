@@ -18,6 +18,17 @@ async function loadChatMappings() {
     }
 }
 
+async function loadSettings(){
+    try {
+        const result = await browser.storage.local.get(['settings']);
+        window.CONFIG.API.BASE_URL = result.settings?.baseUrl || window.CONFIG.API.BASE_URL;
+        console.log('Загружены настройки:', window.CONFIG.API.BASE_URL);
+    } catch (error) {
+        console.error('Ошибка загрузки настроек:', error);
+        window.CONFIG.API.BASE_URL = 'https://myapi.com/v1/'; 
+    }
+}
+
 function createHintBox() {
     hintBox = document.createElement('div');
     hintBox.id = CONFIG.ELEMENTS.HINT_BOX;
@@ -233,7 +244,7 @@ function startObservingInput() {
                     // Устанавливаем новый таймер
                     debounceTimer = setTimeout(async () => {
                         console.log(text);
-                        const address = CONFIG.API.BASE_URL + encodeURIComponent(text)
+                        const address = CONFIG.API.BASE_URL + 'suggestions?client=' + CONFIG.API.CLIENT + '&searchString=' + encodeURIComponent(text)
                         const response = await fetch(address);
                         const json = await response.json();
                         updateHints(json.items);
@@ -265,9 +276,17 @@ function setupStorageListener() {
             }
         }
     });
+    browser.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && changes.settings) {
+            const settings = changes.settings.newValue || {};
+            window.CONFIG.API.BASE_URL = settings.baseUrl || window.CONFIG.API.BASE_URL;
+            console.log('Настройки обновлены:', window.CONFIG.API.BASE_URL);
+        }
+    });
 }
 
 createHintBox();
 loadChatMappings();
+loadSettings();
 setupStorageListener();
 observeInput();

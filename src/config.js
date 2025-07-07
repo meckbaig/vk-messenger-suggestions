@@ -3,8 +3,7 @@
 const CONFIG = {
     // API настройки
     API: {
-        BASE_URL: "url",
-        MEDIA_URL: "url",
+        BASE_URL: "https://myapi.com/v1/",
         CLIENT: "vk"
     },
     
@@ -98,11 +97,7 @@ const CONFIG = {
 CONFIG.COLORS = CONFIG.COLORS_DARK;
 
 // Экспорт для использования в других файлах
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CONFIG;
-} else {
-    window.CONFIG = CONFIG;
-} 
+window.CONFIG = CONFIG;
 
 
 // Загрузка css переменных

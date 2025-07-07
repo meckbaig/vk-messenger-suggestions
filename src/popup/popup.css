@@ -23,7 +23,7 @@ body {
     margin-left: 10px;
   }
 
-  #chats-tab h4, #media-tab h4{
+  #chats-tab h4, #media-tab h4, #settings-tab h4{
     margin: 0;
   }
   
@@ -41,6 +41,9 @@ body {
     background: white;
     color: #666;
     transition: all 0.3s;
+  }
+  .tab.tab-small{
+    flex: none;
   }
   
   .tab.active {

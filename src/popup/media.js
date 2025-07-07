@@ -139,7 +139,7 @@ async function addMediaFile() {
     showStatus('Отправка данных...', 'info');
     
     // Отправка на API
-    const response = await fetch(window.CONFIG.API.MEDIA_URL, {
+    const response = await fetch(window.CONFIG.API.BASE_URL + 'media', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

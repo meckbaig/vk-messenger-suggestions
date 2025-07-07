@@ -23,6 +23,7 @@
   <div class="tabs">
     <button class="tab active" data-tab="chats">Чаты</button>
     <button class="tab" data-tab="media">Медиафайлы</button>
+    <button class="tab tab-small" data-tab="settings">⚙️</button>
   </div>
   
   <!-- Вкладка управления чатами -->
@@ -96,9 +97,21 @@
     
     <div id="status" class="status" style="display: none;"></div>
   </div>
-  
+
+  <!-- Вкладка настроек -->
+  <div id="settings-tab" class="tab-content active">
+    <h4>Настройки</h4>
+    <div class="form">
+      <div class="form-group">
+        <label for="baseUrl">API URL:</label>
+        <input type="text" id="baseUrl" placeholder="https://myapi.com/v1/">
+      </div>
+      <button id="saveSettings">Сохранить настройки</button>
+    </div>
+  </div>
   <script src="media.js"></script>
   <script src="chatMappings.js"></script>
+  <script src="settings.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
