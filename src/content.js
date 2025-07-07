@@ -1,8 +1,3 @@
-// Полифилл для совместимости с Chromium
-if (typeof browser === 'undefined') {
-    window.browser = chrome;
-}
-
 let hintBox;
 let previewBox;
 let currentAudio = null;
