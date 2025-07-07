@@ -10,7 +10,24 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.chatMappingsModule) {
     window.chatMappingsModule.setupChatMappingsForm();
   }
+  // === Обработка переключателя включения/выключения расширения ===
+  const toggle = document.getElementById('extensionToggle');
+  if (toggle) {
+    // Загрузка состояния
+    if (window.browser && browser.storage && browser.storage.local) {
+      browser.storage.local.get(['extensionEnabled'], (result) => {
+        toggle.checked = result.extensionEnabled !== false;
+      });
+    } 
 
+    toggle.addEventListener('change', () => {
+      const enabled = toggle.checked;
+      if (window.browser && browser.storage && browser.storage.local) {
+        browser.storage.local.set({ extensionEnabled: enabled });
+      } 
+      showStatus(enabled ? 'Функциональность включена' : 'Функциональность выключена', enabled ? 'success' : 'error');
+    });
+  }
 });
 
 // Настройка вкладок

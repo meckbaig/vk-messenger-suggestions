@@ -9,6 +9,8 @@ let currentAudio = null;
 let currentButton = null;
 let debounceTimer = null;
 let chatMappings = {};
+let input = null;
+
 
 async function loadChatMappings() {
     try {
@@ -208,13 +210,25 @@ function showMappingPopup(dialogId) {
 
 function observeInput() {
     const observer = new MutationObserver(() => {
-        const input = document.querySelector('[contenteditable]');
+        input = document.querySelector('[contenteditable]');
         if (input && !input.dataset.hooked) {
             input.dataset.hooked = 'true'; // пометка, чтобы не вешать повторно
             console.log('✅ Найдено поле!');
-            input.addEventListener('input', async () => {
-                const text = input.innerText;
-                
+            //todo: переделать и пофиксить
+            startObservingInput();
+        }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+}
+
+function startObservingInput() {
+    if(input){
+        input.addEventListener('input', async () => {
+            browser.storage.local.get(['extensionEnabled'], (result) => {
+                if (result.extensionEnabled !== false) {
+                    const text = input.innerText;
+            
                 // Очищаем предыдущий таймер
                 if (debounceTimer) {
                     clearTimeout(debounceTimer);
@@ -232,19 +246,28 @@ function observeInput() {
                 } else {
                     hideHintBox()
                 }
+                    
+                }
             });
-        }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
+            
+        });
+    }
 }
-
 // Слушатель изменений в хранилище
 function setupStorageListener() {
     browser.storage.onChanged.addListener((changes, area) => {
         if (area === 'local' && changes.chatMappings) {
             chatMappings = changes.chatMappings.newValue || {};
             console.log('Маппинги чатов обновлены:', chatMappings);
+        }
+    });
+    browser.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && changes.extensionEnabled) {
+            const enabled = changes.extensionEnabled.newValue;
+            if (!enabled) {
+                hideHintBox();
+                hidePreviewBox();
+            }
         }
     });
 }
