@@ -12,11 +12,24 @@ body {
     text-align: center;
     margin-bottom: 0;
   }
+
+  .header h3, p{
+    margin: 0;
+  }
+
+  #header-text{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 10px;
+  }
+
+  #chats-tab h4, #media-tab h4{
+    margin: 0;
+  }
   
   .tabs {
     display: flex;
     background: white;
-    border-bottom: 1px solid #ddd;
   }
   
   .tab {
@@ -24,7 +37,7 @@ body {
     padding: 12px;
     text-align: center;
     cursor: pointer;
-    border: none;
+    border: 1px solid #ddd;
     background: white;
     color: #666;
     transition: all 0.3s;
@@ -94,7 +107,7 @@ body {
     border-color: #4a76a8;
   }
   
-  .chat-mapping {
+  .form {
     margin: 15px 0;
     padding: 15px;
     border: 1px solid #ddd;
@@ -138,10 +151,11 @@ body {
   }
   
   .media-form {
-    background: #f9f9f9;
+    margin: 15px 0;
     padding: 15px;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    margin-bottom: 15px;
+    background: #f9f9f9;
   }
   
   .tags-input {
@@ -236,7 +250,15 @@ body {
     display: none !important;
   }
   
+  .input-wrapper{
+    position: relative;
+  }
+
   .get-button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
     background: #28a745;
     color: white;
     border: none;
@@ -244,7 +266,7 @@ body {
     cursor: pointer;
     font-size: 12px;
     padding: 4px 8px;
-    margin-left: 5px;
+
   }
   
   .get-button:hover {
@@ -256,6 +278,7 @@ body {
     display: inline-block;
     width: 40px;
     height: 22px;
+    margin-right: 10px;
   }
   .switch input {display:none;}
   .slider {

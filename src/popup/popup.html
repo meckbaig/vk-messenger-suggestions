@@ -9,11 +9,11 @@
 </head>
 <body>
   <div class="header" style="display: flex; align-items: center; justify-content: space-between;">
-    <div>
-      <h3 style="margin-bottom: 2px;">VK Hint</h3>
-      <p style="margin: 0; font-size: 12px;">Расширение для подсказок в ВКонтакте</p>
+    <div id="header-text">
+      <h3>VK UMS</h3>
+      <p>Расширение для подсказок в ВКонтакте</p>
     </div>
-    <label class="switch" style="margin-left: 16px;">
+    <label id="extensionToggleContainer" class="switch" style="margin-left: 16px;">
       <input type="checkbox" id="extensionToggle" checked>
       <span class="slider round"></span>
     </label>
@@ -27,7 +27,7 @@
   <!-- Вкладка управления чатами -->
   <div id="chats-tab" class="tab-content active">
     <h4>Настройка маппинга чатов</h4>
-    <div class="chat-mapping">
+    <div class="form">
       <div class="form-group">
         <label for="chatName">Название чата:</label>
         <input type="text" id="chatName" placeholder="Например: Моя группа">
@@ -49,7 +49,7 @@
   <!-- Вкладка добавления медиафайлов -->
   <div id="media-tab" class="tab-content">
     <h4>Добавление медиафайлов</h4>
-    <div class="media-form">
+    <div class="form">
       <div class="form-group">
         <label for="mediaType">Тип медиа:</label>
         <select id="mediaType">
@@ -65,19 +65,23 @@
       
       <div class="form-group">
         <label for="description">Описание:</label>
-        <textarea id="description" rows="3" placeholder="Описание медиафайла"></textarea>
+        <textarea id="description" rows="2" placeholder="Описание медиафайла"></textarea>
       </div>
       
       <div class="form-group">
         <label for="dialogId">ID диалога:</label>
-        <input type="text" id="dialogId" placeholder="ID диалога">
-        <button id="getDialog" class="get-button">Get</button>
+        <div class="input-wrapper">
+          <input type="text" id="dialogId" placeholder="ID диалога">
+          <button id="getDialog" class="get-button">Получить</button>
+        </div>
       </div>
       
       <div class="form-group">
         <label for="messageId">ID сообщения:</label>
-        <input type="text" id="messageId" placeholder="ID сообщения">
-        <button id="getMessage" class="get-button">Get</button>
+        <div class="input-wrapper">
+          <input type="text" id="messageId" placeholder="ID сообщения">
+          <button id="getMessage" class="get-button">Получить</button>
+        </div>
       </div>
       
       <div class="form-group">

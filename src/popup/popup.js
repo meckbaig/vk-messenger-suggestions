@@ -12,16 +12,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   // === Обработка переключателя включения/выключения расширения ===
   const toggle = document.getElementById('extensionToggle');
+  const toggleContainer = document.getElementById('extensionToggleContainer');
   if (toggle) {
     // Загрузка состояния
     if (window.browser && browser.storage && browser.storage.local) {
       browser.storage.local.get(['extensionEnabled'], (result) => {
         toggle.checked = result.extensionEnabled !== false;
+        toggleContainer.title = toggle.checked ? 'Расширение включено' : 'Расширение выключено'
       });
     } 
 
     toggle.addEventListener('change', () => {
       const enabled = toggle.checked;
+      toggleContainer.title = toggle.checked ? 'Расширение включено' : 'Расширение выключено'
       if (window.browser && browser.storage && browser.storage.local) {
         browser.storage.local.set({ extensionEnabled: enabled });
       } 
