@@ -24,13 +24,13 @@ function addChat(){
     const chatId = document.getElementById("chatId").value.trim();
 
     if (!chatName || !chatId) {
-        alert("Пожалуйста, заполните оба поля!");
+        showStatus("Пожалуйста, заполните оба поля!", 'error');
         return;
     }
 
     // Проверяем, что ID содержит только цифры
     if (!/^\d+$/.test(chatId)) {
-        alert("ID чата должен содержать только цифры!");
+        showStatus("ID чата должен содержать только цифры!", 'error');
         return;
     }
 
