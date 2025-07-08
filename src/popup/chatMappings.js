@@ -1,73 +1,78 @@
 function setupChatMappingsForm() {
     loadChatMappings();
 
-    // Добавляем делегирование событий для кнопок удаления
-    document.getElementById("chatList").addEventListener("click", (e) => {
-        if (e.target.classList.contains("remove-btn")) {
-            const chatName = e.target.dataset.chatName;
-            if (chatName) {
-                removeChatMapping(chatName);
-            }
+    // Добавляем делегирование событий для кнопок
+    document.getElementById("chatList").addEventListener("click", removeChat);
+    
+    document.getElementById("addChat").addEventListener("click", addChat);
+
+    document.getElementById("getChat").addEventListener("click", getChatData);
+}
+
+function removeChat(e){
+    if (e.target.classList.contains("remove-btn")) {
+        const chatName = e.target.dataset.chatName;
+        if (chatName) {
+            removeChatMapping(chatName);
         }
-    });
+    }
+}
 
-    // Обработчик добавления нового чата
-    document.getElementById("addChat").addEventListener("click", () => {
-        const chatName = document.getElementById("chatName").value.trim();
-        const chatId = document.getElementById("chatId").value.trim();
+// Обработчик добавления нового чата
+function addChat(){
+    const chatName = document.getElementById("chatName").value.trim();
+    const chatId = document.getElementById("chatId").value.trim();
 
-        if (!chatName || !chatId) {
-            alert("Пожалуйста, заполните оба поля!");
-            return;
+    if (!chatName || !chatId) {
+        alert("Пожалуйста, заполните оба поля!");
+        return;
+    }
+
+    // Проверяем, что ID содержит только цифры
+    if (!/^\d+$/.test(chatId)) {
+        alert("ID чата должен содержать только цифры!");
+        return;
+    }
+
+    addChatMapping(chatName, chatId);
+
+    // Очищаем поля
+    document.getElementById("chatName").value = "";
+    document.getElementById("chatId").value = "";
+}
+
+async function getChatData(){
+    try {
+        const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+        // Выполняем скрипт на странице для получения данных
+        const results = await browser.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => {
+                const url = window.location.href;
+                const titleElement = document.querySelector('.ConvoTitle__title h2');
+                const chatName = titleElement ? titleElement.textContent.trim() : null;
+
+                // Извлекаем ID из URL
+                const match = url.match(/\/convo\/(\d+)/);
+                const chatId = match ? match[1] : null;
+
+                return { chatName, chatId, url };
+            }   
+        });
+
+        const result = results[0].result;
+
+        if (result.chatId && result.chatName) {
+            addChatMapping(result.chatName, result.chatId);
+            console.log(`Добавлен чат: ${result.chatName} (ID: ${result.chatId})`);
+        } else {
+            showStatus('Не удалось получить данные чата. Убедитесь, что вы находитесь на странице беседы ВКонтакте', 'error');
         }
 
-        // Проверяем, что ID содержит только цифры
-        if (!/^\d+$/.test(chatId)) {
-            alert("ID чата должен содержать только цифры!");
-            return;
-        }
-
-        addChatMapping(chatName, chatId);
-
-        // Очищаем поля
-        document.getElementById("chatName").value = "";
-        document.getElementById("chatId").value = "";
-    });
-
-    document.getElementById("getChat").addEventListener("click", async () => {
-        try {
-            const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-            // Выполняем скрипт на странице для получения данных
-            const results = await browser.scripting.executeScript({
-                target: { tabId: tab.id },
-                func: () => {
-                    const url = window.location.href;
-                    const titleElement = document.querySelector('.ConvoTitle__title h2');
-                    const chatName = titleElement ? titleElement.textContent.trim() : null;
-
-                    // Извлекаем ID из URL
-                    const match = url.match(/\/convo\/(\d+)/);
-                    const chatId = match ? match[1] : null;
-
-                    return { chatName, chatId, url };
-                }   
-            });
-
-            const result = results[0].result;
-
-            if (result.chatId && result.chatName) {
-                addChatMapping(result.chatName, result.chatId);
-                console.log(`Добавлен чат: ${result.chatName} (ID: ${result.chatId})`);
-            } else {
-                alert('Не удалось получить данные чата. Убедитесь, что вы находитесь на странице беседы ВКонтакте.');
-            }
-
-        } catch (error) {
-            console.error('Ошибка при получении данных чата:', error);
-            alert('Произошла ошибка при получении данных чата.');
-        }
-    });
-
+    } catch (error) {
+        console.error('Ошибка при получении данных чата:', error);
+        showStatus('Произошла ошибка при получении данных чата', 'error');
+    }
 }
 
 
