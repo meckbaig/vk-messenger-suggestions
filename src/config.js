@@ -6,6 +6,13 @@ const CONFIG = {
         BASE_URL: "https://myapi.com/v1/",
         CLIENT: "vk"
     },
+
+    // Настройки идентификации
+    IDENTITY: {
+        TOKEN: null, // Токен пользователя
+        USER_ID: null, // Идентификатор пользователя
+        CLIENT: "vk" // Клиент, для которого используется расширение
+    },
     
     // Настройки debounce
     DEBOUNCE: {
@@ -53,12 +60,13 @@ const CONFIG = {
     COLORS_LIGHT: {
         PRIMARY: '#4a76a8',
         SECONDARY: '#6c757d',
-        TEXT_PRIMARY: '#333',
-        TEXT_SECONDARY: '#666',
-        TEXT_MUTED: '#777',
-        BORDER: '#ddd',
-        BORDER_LIGHT: '#eee',
-        BACKGROUND: '#fff',
+        TEXT_PRIMARY: '#333333',
+        TEXT_ON_PRIMARY: '#ffffff',
+        TEXT_SECONDARY: '#666666',
+        TEXT_MUTED: '#777777',
+        BORDER: '#dddddd',
+        BORDER_LIGHT: '#eeeeee',
+        BACKGROUND: '#ffffff',
         BACKGROUND_HOVER: '#f0f0f0',
         SHADOW: 'rgba(0,0,0,0.3)',
         SHADOW_LIGHT: 'rgba(0,0,0,0.1)',
@@ -71,11 +79,12 @@ const CONFIG = {
     COLORS_DARK: {
         PRIMARY: '#4a76a8',
         SECONDARY: '#6c757d',
-        TEXT_PRIMARY: '#fff',
+        TEXT_PRIMARY: '#ffffff',
+        TEXT_ON_PRIMARY: '#ffffff',
         TEXT_SECONDARY: '#828282',
-        TEXT_MUTED: '#777',
+        TEXT_MUTED: '#777777',
         BORDER: '#363738',
-        BORDER_LIGHT: '#eee',
+        BORDER_LIGHT: '#eeeeee',
         BACKGROUND: '#222222',
         BACKGROUND_HOVER: '#262626',
         SHADOW: 'rgba(0,0,0,0.3)',
@@ -83,14 +92,6 @@ const CONFIG = {
         SUCCESS: '#28a745',
         WARNING: '#ffc107',
         ERROR: '#dc3545'
-    },
-    
-    // Сообщения
-    MESSAGES: {
-        MAPPING_REQUIRED: 'Добавьте маппинг на беседу',
-        MAPPING_INSTRUCTIONS: 'Откройте popup расширения и добавьте новый маппинг.',
-        POPUP_TITLE: 'Настройка маппинга',
-        BUTTON_UNDERSTAND: 'Понятно'
     }
 };
 

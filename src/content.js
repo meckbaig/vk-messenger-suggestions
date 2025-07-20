@@ -214,6 +214,8 @@ function showMappingPopup(dialogId) {
     }, CONFIG.POPUP.AUTO_CLOSE_DELAY);
 }
 
+
+
 function observeInput() {
     const observer = new MutationObserver(() => {
         input = document.querySelector('[contenteditable]');
@@ -230,11 +232,16 @@ function observeInput() {
 
 function startObservingInput() {
     if(input){
-        input.addEventListener('input', async () => {
-            browser.storage.local.get(['extensionEnabled'], (result) => {
-                if (result.extensionEnabled !== false) {
-                    const text = input.innerText;
-            
+        input.addEventListener('input', onInput);
+    }
+}
+
+async function onInput() {
+    browser.storage.local.get(['extensionEnabled'], (result) => {
+        if (result.extensionEnabled !== false) {
+            if(window.CONFIG.IDENTITY.TOKEN) {
+                const text = input.innerText;
+
                 // Очищаем предыдущий таймер
                 if (debounceTimer) {
                     clearTimeout(debounceTimer);
@@ -245,20 +252,27 @@ function startObservingInput() {
                     debounceTimer = setTimeout(async () => {
                         console.log(text);
                         const address = CONFIG.API.BASE_URL + 'suggestions?client=' + CONFIG.API.CLIENT + '&searchString=' + encodeURIComponent(text)
-                        const response = await fetch(address);
+                        const response = await fetch(address, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + (window.CONFIG.IDENTITY.TOKEN)
+                            }
+                        });
                         const json = await response.json();
                         updateHints(json.items);
                     }, CONFIG.DEBOUNCE.DELAY);
                 } else {
                     hideHintBox()
                 }
-                    
-                }
-            });
-            
-        });
-    }
+            }
+            else{
+                showRegistrationPopup()
+            }
+        }
+    });
 }
+
 // Слушатель изменений в хранилище
 function setupStorageListener() {
     browser.storage.onChanged.addListener((changes, area) => {
@@ -285,8 +299,136 @@ function setupStorageListener() {
     });
 }
 
-createHintBox();
-loadChatMappings();
-loadSettings();
-setupStorageListener();
-observeInput();
+function getUser() {
+    return new Promise((resolve) => {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (/^\d+:web_token:login:auth$/.test(key)) {
+                resolve(localStorage.getItem(key));
+                return;
+            }
+        }
+        resolve(null); // Если не найдено, возвращаем null
+    });
+}
+
+async function authenticateUser() {
+    getUser().then(user => {
+        return JSON.parse(user)
+    })
+    .then(user => {
+        const userData = {
+            messengerId: user.user_id.toString(),
+            client: 'vk'
+        };
+        fetch(window.CONFIG.API.BASE_URL + 'auth' + `?messengerId=${userData.messengerId}&client=${userData.client}`)
+        .then(response => response.json())
+        .then(data => {
+            console.debug('Ответ от API:', data);
+            if (data.status == 404) {
+                showRegistrationPopup(userData.messengerId);
+            } else if (data.token) {
+                // Сохраняем токен и идентификатор пользователя в хранилище
+                storeUser(data.token, userData.messengerId, userData.client);
+                console.log('Пользователь успешно аутентифицирован:', userData.messengerId);
+            }
+            else {
+                console.error('Ошибка аутентификации пользователя:', data.errors);
+            }
+        })
+    }).catch(error => {
+        console.error('Ошибка аутентификации пользователя:', error);
+    });  
+}
+
+async function registerUser(userId, userHash){
+    const userData = {
+        userHash: userHash,
+        messengerId: userId,
+        client: 'vk'
+    };
+    fetch(window.CONFIG.API.BASE_URL + 'auth', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+    }).then(response => response.json())
+    .then(data => {
+    if (data.token) {
+        storeUser(data.token, userData.messengerId, userData.client);
+        return true
+    } else {
+        console.error('Ошибка регистрации пользователя');
+        return false
+    }})
+    .catch(error => {
+        console.error('Ошибка регистрации пользователя:', error);
+        return false;
+    })
+}
+
+function storeUser(token, userId, client) { 
+    window.CONFIG.IDENTITY.TOKEN = token;
+    window.CONFIG.IDENTITY.USER_ID = userId;
+    window.CONFIG.IDENTITY.CLIENT = client;
+
+    browser.storage.local.set({ 
+        identity: {
+            token: token,
+            userId: userId,
+            client: client
+        }  
+    });
+}
+
+// Функция для показа popup с сообщением о маппинге
+function showRegistrationPopup(messengerId) {
+    // Создаем popup элемент
+    const popup = document.createElement('dialog');
+    popup.open = true;
+    popup.id = CONFIG.ELEMENTS.POPUP;
+    
+    popup.innerHTML = `
+        <button id="popupCloseButton" value="close">&times;</button>
+        <h3>Регистрация</h3>
+        <p id="popupMessage">Укажите хэш, предоставленный администратором API.</p>
+        <input type="text" id="userHash" placeholder="Введите хэш пользователя">
+        <button id="register">Зарегистрироваться</button>
+    `;
+
+    // Обработчик кнопки крестика
+    popup.querySelector('#popupCloseButton').addEventListener('click', closePopup);
+    
+    popup.querySelector('#register').addEventListener('click', async () => {
+        const userHash = document.getElementById('userHash').value.trim();
+        if((await registerUser(messengerId,userHash))) {
+            closePopup();
+        }
+        else {
+            document.getElementById('popupMessage')
+                .textContent = 'Ошибка регистрации. Проверьте хэш и попробуйте снова.';
+        }
+    });
+    
+    document.body.appendChild(popup);
+}
+
+function closePopup() {
+    const popup = document.getElementById(CONFIG.ELEMENTS.POPUP);
+    if (popup) {
+        document.body.removeChild(popup);
+    }
+}
+
+
+async function init(){
+    createHintBox();
+    await loadChatMappings();
+    await loadSettings();
+    setupStorageListener();
+    observeInput();
+    authenticateUser();
+}
+
+init();
