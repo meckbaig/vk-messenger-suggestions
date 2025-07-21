@@ -4,7 +4,6 @@ const CONFIG = {
   // API настройки
   API: {
     BASE_URL: "https://myapi.com/v1/",
-    CLIENT: "vk",
   },
 
   // Настройки идентификации

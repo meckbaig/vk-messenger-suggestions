@@ -265,7 +265,7 @@ async function onInput() {
             const address =
               CONFIG.API.BASE_URL +
               "suggestions?client=" +
-              CONFIG.API.CLIENT +
+              CONFIG.IDENTITY.CLIENT +
               "&searchString=" +
               encodeURIComponent(text);
             const response = await fetch(address, {
