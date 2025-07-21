@@ -190,8 +190,12 @@ body {
   }
   
   .status {
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 5px;
+    margin: 5px;
     padding: 10px;
-    margin: 10px 0;
     border-radius: 4px;
     font-size: 14px;
   }

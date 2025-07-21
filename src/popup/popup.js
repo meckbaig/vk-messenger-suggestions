@@ -69,12 +69,9 @@ function showStatus(message, type) {
   statusElement.className = `status ${type}`;
   statusElement.style.display = "block";
 
-  // Автоматическое скрытие для успешных сообщений
-  if (type === "success") {
     setTimeout(() => {
       statusElement.style.display = "none";
-    }, 3000);
-  }
+  }, 2000);
 }
 
 window.showStatus = showStatus;
