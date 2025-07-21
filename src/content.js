@@ -329,11 +329,15 @@ function getUser() {
 }
 
 async function authenticateUser() {
-  getUser()
-    .then((user) => {
+  // Очищаем данные в хранилище
+  await storeUser("", "", "")
+
+  getUser().then((user) => {
       return JSON.parse(user);
     })
     .then((user) => {
+    if (!user)
+      throw new Error("Пользователь не найден в localStorage"); 
       const userData = {
         messengerId: user.user_id.toString(),
         client: "vk",
@@ -349,7 +353,7 @@ async function authenticateUser() {
           if (data.status == 404) {
             showRegistrationPopup(userData.messengerId);
           } else if (data.token) {
-            // Сохраняем токен и идентификатор пользователя в хранилище
+          // Сохраняем токен и идентификатор пользователя в хранилище и обновляем конфигурацию
             storeUser(data.token, userData.messengerId, userData.client);
             console.log(
               "Пользователь успешно аутентифицирован:",
@@ -371,7 +375,7 @@ async function registerUser(userId, userHash) {
     messengerId: userId,
     client: "vk",
   };
-  fetch(window.CONFIG.API.BASE_URL + "auth", {
+  return fetch(window.CONFIG.API.BASE_URL + "auth", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -381,6 +385,7 @@ async function registerUser(userId, userHash) {
     .then((response) => response.json())
     .then((data) => {
       if (data.token) {
+        console.debug("Пользователь успешно зарегистрирован:", userId);
         storeUser(data.token, userData.messengerId, userData.client);
         return true;
       } else {
@@ -394,12 +399,12 @@ async function registerUser(userId, userHash) {
     });
 }
 
-function storeUser(token, userId, client) {
+async function storeUser(token, userId, client) {
   window.CONFIG.IDENTITY.TOKEN = token;
   window.CONFIG.IDENTITY.USER_ID = userId;
   window.CONFIG.IDENTITY.CLIENT = client;
 
-  browser.storage.local.set({
+  await browser.storage.local.set({
     identity: {
       token: token,
       userId: userId,
