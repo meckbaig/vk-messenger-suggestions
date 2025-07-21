@@ -1,5 +1,15 @@
 // Инициализация формы медиафайлов
-function setupMediaForm() {
+async function setupMediaForm() {
+  const result = await browser.storage.local.get(["identity"])
+  window.CONFIG.IDENTITY.TOKEN = result.identity.TOKEN || "";
+  window.CONFIG.IDENTITY.USER_ID = result.identity.userId || "";
+  window.CONFIG.IDENTITY.CLIENT = result.identity.client || "";
+  
+  if (!result.identity?.userId){
+    document.getElementById("hideMediaOptions").style.display = "block";
+    return;
+  }
+
   // Обработчик добавления медиафайла
   document.getElementById("addMedia").addEventListener("click", addMediaFile);
 
@@ -166,6 +176,7 @@ async function addMediaFile() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${window.CONFIG.IDENTITY.TOKEN}`,
       },
       body: JSON.stringify(mediaData),
     });

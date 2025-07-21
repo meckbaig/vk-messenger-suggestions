@@ -27,6 +27,10 @@ body {
     margin: 0;
   }
   
+  #media-tab{
+    position: relative;
+  }
+  
   .tabs {
     display: flex;
     background: white;
@@ -278,6 +282,22 @@ body {
   
   .get-button:hover {
     background: #218838;
+  }
+
+  #hideMediaOptions {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background: white;
+    z-index: 9999;
+    align-content: center;
+  }
+
+  #hideMediaOptions p {
+    text-align: center;
   }
 
   .switch {
