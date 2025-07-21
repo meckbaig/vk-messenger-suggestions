@@ -69,8 +69,8 @@ function showStatus(message, type) {
   statusElement.className = `status ${type}`;
   statusElement.style.display = "block";
 
-    setTimeout(() => {
-      statusElement.style.display = "none";
+  setTimeout(() => {
+    statusElement.style.display = "none";
   }, 2000);
 }
 
