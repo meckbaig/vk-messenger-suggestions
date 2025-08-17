@@ -283,7 +283,7 @@ async function onInput() {
           hideHintBox();
         }
       } else {
-        showRegistrationPopup();
+        authenticateUser();
       }
     }
   });
