@@ -418,6 +418,10 @@ async function storeUser(token, userId, client) {
 // Функция для показа popup с сообщением о маппинге
 function showRegistrationPopup(messengerId) {
   // Создаем popup элемент
+  if (document.getElementById(CONFIG.ELEMENTS.POPUP)) {
+    return; // Если уже открыт, не открываем снова
+  }
+
   const popup = document.createElement("dialog");
   popup.open = true;
   popup.id = CONFIG.ELEMENTS.POPUP;
