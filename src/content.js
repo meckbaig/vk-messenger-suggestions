@@ -276,6 +276,7 @@ async function onInput() {
               },
             });
             const json = await response.json();
+            console.debug("Ответ от API:", json);
             updateHints(json.items);
           }, CONFIG.DEBOUNCE.DELAY);
         } else {
@@ -316,7 +317,7 @@ function setupStorageListener() {
 }
 
 function getUser() {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (/^\d+:web_token:login:auth$/.test(key)) {
@@ -324,45 +325,46 @@ function getUser() {
         return;
       }
     }
-    resolve(null); // Если не найдено, возвращаем null
+    reject(new Error("Пользователь не найден в localStorage")); // Если не найдено
   });
 }
 
 async function authenticateUser() {
   // Очищаем данные в хранилище
   await storeUser("", "", "")
-
-  getUser().then((user) => {
+  const userData = {
+    messengerId: "",
+    client: "vk",
+  };
+  
+  getUser()
+    .then((user) => {
       return JSON.parse(user);
     })
     .then((user) => {
-    if (!user)
-      throw new Error("Пользователь не найден в localStorage"); 
-      const userData = {
-        messengerId: user.user_id.toString(),
-        client: "vk",
-      };
-      fetch(
+      userData.messengerId = user.user_id.toString();
+    })
+    .then(() => {
+      return fetch(
         window.CONFIG.API.BASE_URL +
-          "auth" +
-          `?messengerId=${userData.messengerId}&client=${userData.client}`
+          `auth?messengerId=${userData.messengerId}&client=${userData.client}`
       )
-        .then((response) => response.json())
-        .then((data) => {
-          console.debug("Ответ от API:", data);
-          if (data.status == 404) {
-            showRegistrationPopup(userData.messengerId);
-          } else if (data.token) {
-          // Сохраняем токен и идентификатор пользователя в хранилище и обновляем конфигурацию
-            storeUser(data.token, userData.messengerId, userData.client);
-            console.log(
-              "Пользователь успешно аутентифицирован:",
-              userData.messengerId
-            );
-          } else {
-            console.error("Ошибка аутентификации пользователя:", data.errors);
-          }
-        });
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      console.debug("Ответ от API:", data);
+      if (data.status == 404) {
+        showRegistrationPopup(userData.messengerId);
+      } else if (data.token) {
+      // Сохраняем токен и идентификатор пользователя в хранилище и обновляем конфигурацию
+        storeUser(data.token, userData.messengerId, userData.client);
+        console.log(
+          "Пользователь успешно аутентифицирован:",
+          userData.messengerId
+        );
+      } else {
+        console.error("Ошибка аутентификации пользователя:", data.errors);
+      }
     })
     .catch((error) => {
       console.error("Ошибка аутентификации пользователя:", error);
