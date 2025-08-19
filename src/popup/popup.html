@@ -62,7 +62,12 @@
       
       <div class="form-group">
         <label for="mediaUrl">URL медиафайла:</label>
-        <input type="url" id="mediaUrl" placeholder="https://example.com/media/file.mp3">
+        
+        <div class="input-wrapper">
+          <input type="url" id="mediaUrl" placeholder="https://example.com/media/file.jpg">
+          <button id="uploadFile" class="get-button">Загрузить</button>
+          <input type="file" id="fileInput" accept="image/*, audio/*" style="display: none;">
+        </div>
       </div>
       
       <div class="form-group">

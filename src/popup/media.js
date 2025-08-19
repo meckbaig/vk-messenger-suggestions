@@ -1,7 +1,8 @@
 // Инициализация формы медиафайлов
 async function setupMediaForm() {
   const result = await browser.storage.local.get(["identity"])
-  window.CONFIG.IDENTITY.TOKEN = result.identity.TOKEN || "";
+  console.debug(result);
+  window.CONFIG.IDENTITY.TOKEN = result.identity.token || "";
   window.CONFIG.IDENTITY.USER_ID = result.identity.userId || "";
   window.CONFIG.IDENTITY.CLIENT = result.identity.client || "";
   
@@ -24,9 +25,22 @@ async function setupMediaForm() {
     .getElementById("mediaType")
     .addEventListener("change", toggleMessageFields);
 
+  document.getElementById('uploadFile')
+    .addEventListener('click', () => {
+        document.getElementById('fileInput').click();
+      });
+        
+  document.getElementById('fileInput')
+    .addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        document.getElementById('mediaUrl').value = "[File] " + e.target.files[0].name;
+      }
+  });
   // Инициализация отображения полей
   toggleMessageFields();
 }
+
+
 
 // Переключение отображения полей диалога и сообщения
 function toggleMessageFields() {
@@ -125,7 +139,45 @@ async function getMessageData() {
 // Добавление медиафайла через API
 async function addMediaFile() {
   const mediaType = document.getElementById("mediaType").value;
-  const mediaUrl = document.getElementById("mediaUrl").value.trim();
+  var mediaUrl = document.getElementById("mediaUrl").value.trim();
+
+  if (mediaUrl.includes("[File]")) {
+    if (document.getElementById("fileInput").files.length > 0) {
+      const file = document.getElementById("fileInput").files[0];
+      
+      const formData = new FormData();
+      formData.append("File", file, file.name);
+      formData.append("MediaType", mediaType);
+      console.debug(window.CONFIG.IDENTITY);
+      const response = await fetch(window.CONFIG.API.BASE_URL + "media/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${window.CONFIG.IDENTITY.TOKEN}`
+        },
+        body: formData,
+      });
+      console.debug(response);
+      if (response.ok) {
+        const data = await response.json();
+        mediaUrl = data.previewUrl; // Получаем URL загруженного файла
+      } else {
+        const errorData = await response.json();
+        showStatus(`Ошибка загрузки файла: ${errorData.title}`, "error");
+        return;
+      }
+    }
+    else{
+      showStatus("Пожалуйста, загрузите файл", "error");
+      return;
+    }
+  }
+  else if (!URL.canParse(mediaUrl)) {
+    showStatus("Пожалуйста, введите корректный URL медиафайла", "error");
+    return;
+  }
+  
+
   const description = document.getElementById("description").value.trim();
   const platform = "vk";
   const dialogId = document.getElementById("dialogId").value.trim();
@@ -185,7 +237,7 @@ async function addMediaFile() {
     } else {
       const errorData = await response.json();
       showStatus(
-        `Ошибка: ${errorData.message || "Неизвестная ошибка"}`,
+        `Ошибка: ${errorData.title || "Неизвестная ошибка"}`,
         "error"
       );
     }
