@@ -52,7 +52,6 @@ async function getDialogData() {
   try {
     const [tab] = await browser.tabs.query({
       active: true,
-      currentWindow: true,
     });
 
     const results = await browser.scripting.executeScript({
@@ -87,7 +86,6 @@ async function getMessageData() {
   try {
     const [tab] = await browser.tabs.query({
       active: true,
-      currentWindow: true,
     });
 
     const results = await browser.scripting.executeScript({

@@ -45,7 +45,6 @@ async function getChatData() {
   try {
     const [tab] = await browser.tabs.query({
       active: true,
-      currentWindow: true,
     });
     // Выполняем скрипт на странице для получения данных
     const results = await browser.scripting.executeScript({
