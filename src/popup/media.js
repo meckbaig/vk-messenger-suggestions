@@ -146,13 +146,12 @@ async function addMediaFile() {
       const file = document.getElementById("fileInput").files[0];
       
       const formData = new FormData();
-      formData.append("File", file, file.name);
-      formData.append("MediaType", mediaType);
+      formData.append("file", file, file.name);
+      formData.append("mediaType", mediaType);
       console.debug(window.CONFIG.IDENTITY);
       const response = await fetch(window.CONFIG.API.BASE_URL + "media/upload", {
         method: "POST",
         headers: {
-          "Content-Type": "multipart/form-data",
           "Authorization": `Bearer ${window.CONFIG.IDENTITY.TOKEN}`
         },
         body: formData,
