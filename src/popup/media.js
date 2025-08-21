@@ -149,21 +149,27 @@ async function addMediaFile() {
       formData.append("file", file, file.name);
       formData.append("mediaType", mediaType);
       console.debug(window.CONFIG.IDENTITY);
-      const response = await fetch(window.CONFIG.API.BASE_URL + "media/upload", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${window.CONFIG.IDENTITY.TOKEN}`
-        },
-        body: formData,
-      });
-      console.debug(response);
-      if (response.ok) {
-        const data = await response.json();
-        mediaUrl = data.previewUrl; // Получаем URL загруженного файла
-      } else {
-        const errorData = await response.json();
-        showStatus(`Ошибка загрузки файла: ${errorData.title}`, "error");
-        return;
+      try {
+        showStatus("Загрузка файла...", "info");
+        const response = await fetch(window.CONFIG.API.BASE_URL + "media/upload", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${window.CONFIG.IDENTITY.TOKEN}`
+          },
+          body: formData,
+        });
+        console.debug(response);
+        if (response.ok) {
+          const data = await response.json();
+          mediaUrl = data.previewUrl; // Получаем URL загруженного файла
+        } else {
+          const errorData = await response.json();
+          showStatus(`Ошибка загрузки файла: ${errorData.title}`, "error");
+          return;
+        }
+      } catch (error) {
+        console.error("Ошибка при загрузке файла:", error);
+        showStatus("Ошибка сети при отправке данных", "error");
       }
     }
     else{
