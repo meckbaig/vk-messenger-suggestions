@@ -11,3 +11,7 @@ browser.action.onClicked.addListener(() => {
     focused: true
   });
 });
+
+browser.runtime.onInstalled.addListener(() => {
+  browser.storage.local.set({ extensionEnabled: true });
+});
