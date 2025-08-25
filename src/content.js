@@ -303,14 +303,14 @@ function getUser() {
 }
 
 async function authenticateUser() {
-  return getUser()
+  return await getUser()
     .then((user) => {
       return JSON.parse(user);
     })
     .then((user) => {
       return user.user_id.toString();
     })
-    .then(() => authenticateUser(userData.messengerId));
+    .then((userId) => authenticateUser(userId));
 }
 
 // Слушатель изменений в хранилище
@@ -348,13 +348,9 @@ function setupStorageListener() {
     }
   });
 
-  browser.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+  browser.runtime.onMessage.addListener((request, sender) => {
     if (request.type === "GET_VK_USER") {
-      const user = await getUser()
-        .then((user) => {
-          return JSON.parse(user);
-        })
-      sendResponse({ user: user });  
+      return Promise.resolve(getUser().then((user) => { return JSON.parse(user); }));
     }
   });
 }

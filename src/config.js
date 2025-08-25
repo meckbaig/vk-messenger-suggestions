@@ -127,10 +127,10 @@ async function registerUser(userId, userHash) {
     body: JSON.stringify(userData),
   })
     .then((response) => response.json())
-    .then((data) => {
+    .then(async (data) => {
       if (data.token) {
         console.debug("Пользователь успешно зарегистрирован:", userId);
-        storeUser(data.token, userData.messengerId, userData.client);
+        await storeUser(data.token, userData.messengerId, userData.client);
         return true;
       } else {
         console.error("Ошибка регистрации пользователя");
@@ -150,31 +150,34 @@ async function authenticateUser(messengerId) {
     messengerId: messengerId,
     client: "vk",
   };
-    fetch(
-      window.CONFIG.API.BASE_URL +
-        `auth?messengerId=${userData.messengerId}&client=${userData.client}`
-    )
-    .then((response) => response.json())
-    .then((data) => {
-      console.debug("Ответ от API:", data);
-      if (data.token) {
-      // Сохраняем токен и идентификатор пользователя в хранилище и обновляем конфигурацию
-        storeUser(data.token, userData.messengerId, userData.client);
-        console.log(
-          "Пользователь успешно аутентифицирован:",
-          userData.messengerId
-        );
-        return true;
-      } else {
-        console.error("Ошибка аутентификации пользователя:", data.errors);
-        return false;
-      }
-    })
-    .catch((error) => {
-      console.error("Ошибка аутентификации пользователя:", error);
+  return await fetch(
+    window.CONFIG.API.BASE_URL +
+      `auth?messengerId=${userData.messengerId}&client=${userData.client}`
+  )
+  .then((response) => response.json())
+  .then(async (data) => {
+    console.debug("Ответ от API:", data);
+    if (data.token) {
+    // Сохраняем токен и идентификатор пользователя в хранилище и обновляем конфигурацию
+      await storeUser(data.token, userData.messengerId, userData.client);
+      console.log(
+        "Пользователь успешно аутентифицирован:",
+        userData.messengerId
+      );
+      return true;
+    } else {
+      console.error("Ошибка аутентификации пользователя:", data.errors);
       return false;
-    });
+    }
+  })
+  .catch((error) => {
+    console.error("Ошибка аутентификации пользователя:", error);
+    return false;
+  });
 }
+
+window.authenticateUser = authenticateUser;
+window.registerUser = registerUser;
 
 
 async function storeUser(token, userId, client) {
@@ -190,7 +193,5 @@ async function storeUser(token, userId, client) {
     },
   });
 }
-
-window.getUser = getUser;
 
 loadCssVariables();

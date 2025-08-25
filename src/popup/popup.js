@@ -13,21 +13,19 @@ document.addEventListener("DOMContentLoaded", () => {
     window.settingsModule.setupSettingsForm();
   }
 
-  const result = browser.storage.local.get(["identity"], (result) => {
-    console.debug(result);
-    window.CONFIG.IDENTITY.TOKEN = result.identity.token || "";
-    window.CONFIG.IDENTITY.USER_ID = result.identity.userId || "";
-    window.CONFIG.IDENTITY.CLIENT = result.identity.client || "";
-    if (!result.identity?.userId){
+  browser.storage.local.get(["identity"], (result) => {
+    if (!result.identity){
       const tabs = document.querySelectorAll(".tab");
       tabs.forEach((tab) => { 
         tab.classList.add('disabled');
       });
-      return;
     }
     else {
+      window.CONFIG.IDENTITY.TOKEN = result.identity.token || "";
+      window.CONFIG.IDENTITY.USER_ID = result.identity.userId || "";
+      window.CONFIG.IDENTITY.CLIENT = result.identity.client || "";
       document.getElementById("authSection").style.display = "none";
-    }
+    }    
   });
 
   // === Обработка переключателя включения/выключения расширения ===

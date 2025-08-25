@@ -23,7 +23,7 @@ function setupSettingsForm() {
     }
     window.CONFIG.API.BASE_URL = settings.baseUrl;
     // Сохраняем настройки в локальное хранилище
-    browser.storage.local.set({ settings: settings }, function () {
+    browser.storage.local.set({ settings: settings },  () => {
       showStatus("Настройки сохранены", "success");
     });
   });
@@ -32,11 +32,10 @@ function setupSettingsForm() {
     const userHash = document.getElementById("userHash").value.trim();
     try {
       const [tab] = await browser.tabs.query({
-      active: true,
-    });
-      const response = await browser.tabs.sendMessage(tab.id, { type: "GET_VK_USER" });
-      var user = response.user;
-      if(registerUser(user.user_id.toString(), userHash))
+        active: true,
+      });
+      const user = await browser.tabs.sendMessage(tab.id, { type: "GET_VK_USER" });
+      if(user && await registerUser(user?.user_id?.toString(), userHash))
       {
         const tabs = document.querySelectorAll(".tab");
         tabs.forEach((tab) => { 
