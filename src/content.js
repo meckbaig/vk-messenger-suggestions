@@ -55,7 +55,7 @@ function hidePreviewBox() {
 
 function updateHints(suggestions) {
   hintBox.innerHTML = "";
-  if (suggestions === undefined || suggestions.length == 0) {
+  if (suggestions === undefined || suggestions.length == 0 || input.innerText.length < CONFIG.SEARCH.MIN_LENGTH) {
     hideHintBox();
     hidePreviewBox();
     return;
