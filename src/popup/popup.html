@@ -21,13 +21,13 @@
   </div>
   
   <div class="tabs">
-    <button class="tab active" data-tab="chats">Чаты</button>
     <button class="tab" data-tab="media">Медиафайлы</button>
-    <button class="tab tab-small" data-tab="settings">⚙️</button>
+    <button class="tab" data-tab="chats">Чаты</button>
+    <button class="tab tab-small active" data-tab="settings">⚙️</button>
   </div>
   
   <!-- Вкладка управления чатами -->
-  <div id="chats-tab" class="tab-content active">
+  <div id="chats-tab" class="tab-content">
     <h4>Настройка маппинга чатов</h4>
     <div class="form">
       <div class="form-group">
@@ -61,11 +61,23 @@
       </div>
       
       <div class="form-group">
+        <label for="dialogId">Сообщение:</label>
+        <div class="input-row">
+          <div class="input-wrapper">
+            <input type="text" id="dialogId" placeholder="ID диалога">
+          </div>
+          <div class="input-wrapper">
+            <input type="text" id="messageId" placeholder="ID сообщения">
+            <button id="getMessageData" class="get-button">Получить</button>
+          </div> 
+        </div>
+      </div>
+
+      <div class="form-group">
         <label for="mediaUrl">URL медиафайла:</label>
-        
         <div class="input-wrapper">
           <input type="url" id="mediaUrl" placeholder="https://example.com/media/file.jpg">
-          <button id="uploadFile" class="get-button">Загрузить</button>
+          <button id="getFile" class="get-button">Загрузить</button>
           <input type="file" id="fileInput" accept="image/*, audio/*" style="display: none;">
         </div>
       </div>
@@ -73,20 +85,6 @@
       <div class="form-group">
         <label for="description">Описание:</label>
         <textarea id="description" rows="1" placeholder="Описание медиафайла"></textarea>
-      </div>
-      
-      <div class="form-group">
-        <label for="dialogId">Сообщение:</label>
-        <div class="input-row">
-          <div class="input-wrapper">
-            <input type="text" id="dialogId" placeholder="ID диалога">
-            <button id="getDialog" class="get-button">Получить</button>
-          </div>
-          <div class="input-wrapper">
-            <input type="text" id="messageId" placeholder="ID сообщения">
-            <button id="getMessage" class="get-button">Получить</button>
-          </div>
-        </div>
       </div>
       
       <div class="form-group">
@@ -104,7 +102,7 @@
   </div>
 
   <!-- Вкладка настроек -->
-  <div id="settings-tab" class="tab-content">
+  <div id="settings-tab" class="tab-content active">
     <h4>Настройки</h4>
     <div class="form">
       <div class="form-group">
@@ -113,6 +111,17 @@
       </div>
       <button id="saveSettings">Сохранить настройки</button>
     </div>
+    <div id="authSection">
+      <h4>Регистрация</h4>
+      <div class="form">
+        <div class="form-group">
+          <p id="registerMessage">Укажите хэш, предоставленный администратором API.</p>
+          <input type="text" id="userHash" placeholder="Введите хэш пользователя">
+          <button id="register">Зарегистрироваться</button>
+        </div>
+      </div>
+    </div>
+    
   </div>
 
   <div id="status-box"></div>

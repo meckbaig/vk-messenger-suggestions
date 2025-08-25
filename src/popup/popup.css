@@ -265,6 +265,11 @@ body {
     display: none !important;
   }
   
+  .disabled {
+    opacity: 0.6;
+    pointer-events: none !important;
+  }
+
   .input-wrapper{
     position: relative;
     margin: 2px;

@@ -27,6 +27,31 @@ function setupSettingsForm() {
       showStatus("Настройки сохранены", "success");
     });
   });
+
+  document.getElementById("register").addEventListener("click", async () => {
+    const userHash = document.getElementById("userHash").value.trim();
+    try {
+      const [tab] = await browser.tabs.query({
+      active: true,
+    });
+      const response = await browser.tabs.sendMessage(tab.id, { type: "GET_VK_USER" });
+      var user = response.user;
+      if(registerUser(user.user_id.toString(), userHash))
+      {
+        const tabs = document.querySelectorAll(".tab");
+        tabs.forEach((tab) => { 
+          tab.classList.remove('disabled');
+        });
+        document.getElementById("authSection").style.display = "none";
+        showStatus("Регистрация успешна", "success");
+      } else {
+        showStatus("Ошибка регистрации. Проверьте хэш и попробуйте снова.", "error");
+      }
+    }
+    catch (error) {
+      showStatus("Ошибка регистрации " + error, "error");
+    }
+  });
 }
 
 window.settingsModule = {

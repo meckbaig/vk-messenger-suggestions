@@ -111,4 +111,86 @@ function loadCssVariables() {
   root.style.setProperty("--vk-popup-max-width", CONFIG.POPUP.MAX_WIDTH);
 }
 
+
+
+async function registerUser(userId, userHash) {
+  const userData = {
+    userHash: userHash,
+    messengerId: userId,
+    client: "vk",
+  };
+  return fetch(window.CONFIG.API.BASE_URL + "auth", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(userData),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.token) {
+        console.debug("Пользователь успешно зарегистрирован:", userId);
+        storeUser(data.token, userData.messengerId, userData.client);
+        return true;
+      } else {
+        console.error("Ошибка регистрации пользователя");
+        return false;
+      }
+    })
+    .catch((error) => {
+      console.error("Ошибка регистрации пользователя:", error);
+      return false;
+    });
+}
+
+async function authenticateUser(messengerId) {
+  // Очищаем данные в хранилище
+  await storeUser("", "", "")
+  const userData = {
+    messengerId: messengerId,
+    client: "vk",
+  };
+    fetch(
+      window.CONFIG.API.BASE_URL +
+        `auth?messengerId=${userData.messengerId}&client=${userData.client}`
+    )
+    .then((response) => response.json())
+    .then((data) => {
+      console.debug("Ответ от API:", data);
+      if (data.token) {
+      // Сохраняем токен и идентификатор пользователя в хранилище и обновляем конфигурацию
+        storeUser(data.token, userData.messengerId, userData.client);
+        console.log(
+          "Пользователь успешно аутентифицирован:",
+          userData.messengerId
+        );
+        return true;
+      } else {
+        console.error("Ошибка аутентификации пользователя:", data.errors);
+        return false;
+      }
+    })
+    .catch((error) => {
+      console.error("Ошибка аутентификации пользователя:", error);
+      return false;
+    });
+}
+
+
+async function storeUser(token, userId, client) {
+  window.CONFIG.IDENTITY.TOKEN = token;
+  window.CONFIG.IDENTITY.USER_ID = userId;
+  window.CONFIG.IDENTITY.CLIENT = client;
+
+  await browser.storage.local.set({
+    identity: {
+      token: token,
+      userId: userId,
+      client: client,
+    },
+  });
+}
+
+window.getUser = getUser;
+
 loadCssVariables();

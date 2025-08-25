@@ -283,10 +283,34 @@ async function onInput() {
           hideHintBox();
         }
       } else {
-        authenticateUser();
+        //authenticateUser();
       }
     }
   });
+}
+
+function getUser() {
+  return new Promise((resolve, reject) => {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (/^\d+:web_token:login:auth$/.test(key)) {
+        resolve(localStorage.getItem(key));
+        return;
+      }
+    }
+    reject(new Error("Пользователь не найден в localStorage")); // Если не найдено
+  });
+}
+
+async function authenticateUser() {
+  return getUser()
+    .then((user) => {
+      return JSON.parse(user);
+    })
+    .then((user) => {
+      return user.user_id.toString();
+    })
+    .then(() => authenticateUser(userData.messengerId));
 }
 
 // Слушатель изменений в хранилище
@@ -314,149 +338,25 @@ function setupStorageListener() {
       console.log("Настройки обновлены:", window.CONFIG.API.BASE_URL);
     }
   });
-}
-
-function getUser() {
-  return new Promise((resolve, reject) => {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (/^\d+:web_token:login:auth$/.test(key)) {
-        resolve(localStorage.getItem(key));
-        return;
-      }
-    }
-    reject(new Error("Пользователь не найден в localStorage")); // Если не найдено
-  });
-}
-
-async function authenticateUser() {
-  // Очищаем данные в хранилище
-  await storeUser("", "", "")
-  const userData = {
-    messengerId: "",
-    client: "vk",
-  };
-  
-  getUser()
-    .then((user) => {
-      return JSON.parse(user);
-    })
-    .then((user) => {
-      userData.messengerId = user.user_id.toString();
-    })
-    .then(() => {
-      return fetch(
-        window.CONFIG.API.BASE_URL +
-          `auth?messengerId=${userData.messengerId}&client=${userData.client}`
-      )
-    })
-    .then((response) => response.json())
-    .then((data) => {
-      console.debug("Ответ от API:", data);
-      if (data.status == 404) {
-        showRegistrationPopup(userData.messengerId);
-      } else if (data.token) {
-      // Сохраняем токен и идентификатор пользователя в хранилище и обновляем конфигурацию
-        storeUser(data.token, userData.messengerId, userData.client);
-        console.log(
-          "Пользователь успешно аутентифицирован:",
-          userData.messengerId
-        );
-      } else {
-        console.error("Ошибка аутентификации пользователя:", data.errors);
-      }
-    })
-    .catch((error) => {
-      console.error("Ошибка аутентификации пользователя:", error);
-    });
-}
-
-async function registerUser(userId, userHash) {
-  const userData = {
-    userHash: userHash,
-    messengerId: userId,
-    client: "vk",
-  };
-  return fetch(window.CONFIG.API.BASE_URL + "auth", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userData),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.token) {
-        console.debug("Пользователь успешно зарегистрирован:", userId);
-        storeUser(data.token, userData.messengerId, userData.client);
-        return true;
-      } else {
-        console.error("Ошибка регистрации пользователя");
-        return false;
-      }
-    })
-    .catch((error) => {
-      console.error("Ошибка регистрации пользователя:", error);
-      return false;
-    });
-}
-
-async function storeUser(token, userId, client) {
-  window.CONFIG.IDENTITY.TOKEN = token;
-  window.CONFIG.IDENTITY.USER_ID = userId;
-  window.CONFIG.IDENTITY.CLIENT = client;
-
-  await browser.storage.local.set({
-    identity: {
-      token: token,
-      userId: userId,
-      client: client,
-    },
-  });
-}
-
-// Функция для показа popup с сообщением о маппинге
-function showRegistrationPopup(messengerId) {
-  // Создаем popup элемент
-  if (document.getElementById(CONFIG.ELEMENTS.POPUP)) {
-    return; // Если уже открыт, не открываем снова
-  }
-
-  const popup = document.createElement("dialog");
-  popup.open = true;
-  popup.id = CONFIG.ELEMENTS.POPUP;
-
-  popup.innerHTML = `
-        <button id="popupCloseButton" value="close">&times;</button>
-        <h3>Регистрация</h3>
-        <p id="popupMessage">Укажите хэш, предоставленный администратором API.</p>
-        <input type="text" id="userHash" placeholder="Введите хэш пользователя">
-        <button id="register">Зарегистрироваться</button>
-    `;
-
-  // Обработчик кнопки крестика
-  popup
-    .querySelector("#popupCloseButton")
-    .addEventListener("click", closePopup);
-
-  popup.querySelector("#register").addEventListener("click", async () => {
-    const userHash = document.getElementById("userHash").value.trim();
-    if (await registerUser(messengerId, userHash)) {
-      closePopup();
-    } else {
-      document.getElementById("popupMessage").textContent =
-        "Ошибка регистрации. Проверьте хэш и попробуйте снова.";
+  browser.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && changes.identity) {
+      const identity = changes.identity.newValue || {};
+      window.CONFIG.IDENTITY.TOKEN = identity.token || "";
+      window.CONFIG.IDENTITY.USER_ID = identity.userId || ""; 
+      window.CONFIG.IDENTITY.CLIENT = identity.client || "";
+      console.log("Настройки обновлены:", window.CONFIG.API.BASE_URL);
     }
   });
 
-  document.body.appendChild(popup);
-}
-
-function closePopup() {
-  const popup = document.getElementById(CONFIG.ELEMENTS.POPUP);
-  if (popup) {
-    document.body.removeChild(popup);
-  }
+  browser.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+    if (request.type === "GET_VK_USER") {
+      const user = await getUser()
+        .then((user) => {
+          return JSON.parse(user);
+        })
+      sendResponse({ user: user });  
+    }
+  });
 }
 
 async function init() {

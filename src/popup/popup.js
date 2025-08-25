@@ -12,6 +12,24 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.settingsModule) {
     window.settingsModule.setupSettingsForm();
   }
+
+  const result = browser.storage.local.get(["identity"], (result) => {
+    console.debug(result);
+    window.CONFIG.IDENTITY.TOKEN = result.identity.token || "";
+    window.CONFIG.IDENTITY.USER_ID = result.identity.userId || "";
+    window.CONFIG.IDENTITY.CLIENT = result.identity.client || "";
+    if (!result.identity?.userId){
+      const tabs = document.querySelectorAll(".tab");
+      tabs.forEach((tab) => { 
+        tab.classList.add('disabled');
+      });
+      return;
+    }
+    else {
+      document.getElementById("authSection").style.display = "none";
+    }
+  });
+
   // === Обработка переключателя включения/выключения расширения ===
   const toggle = document.getElementById("extensionToggle");
   const toggleContainer = document.getElementById("extensionToggleContainer");

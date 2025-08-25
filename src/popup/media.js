@@ -1,16 +1,7 @@
+
 // Инициализация формы медиафайлов
 async function setupMediaForm() {
-  const result = await browser.storage.local.get(["identity"])
-  console.debug(result);
-  window.CONFIG.IDENTITY.TOKEN = result.identity.token || "";
-  window.CONFIG.IDENTITY.USER_ID = result.identity.userId || "";
-  window.CONFIG.IDENTITY.CLIENT = result.identity.client || "";
   
-  if (!result.identity?.userId){
-    document.getElementById("hideMediaOptions").style.display = "block";
-    return;
-  }
-
   // Обработчик добавления медиафайла
   document.getElementById("addMedia").addEventListener("click", addMediaFile);
 
