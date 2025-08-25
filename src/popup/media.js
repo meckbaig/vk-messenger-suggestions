@@ -15,17 +15,14 @@ async function setupMediaForm() {
   document.getElementById("addMedia").addEventListener("click", addMediaFile);
 
   // Обработчики для кнопок получения данных
-  document.getElementById("getDialog").addEventListener("click", getDialogData);
-  document
-    .getElementById("getMessage")
-    .addEventListener("click", getMessageData);
+  document.getElementById("getMessageData").addEventListener("click", getMessageData);
 
   // Обработчик изменения типа медиа
   document
     .getElementById("mediaType")
-    .addEventListener("change", toggleMessageFields);
+    .addEventListener("change", toggleMediaTypes);
 
-  document.getElementById('uploadFile')
+  document.getElementById('getFile')
     .addEventListener('click', () => {
         document.getElementById('fileInput').click();
       });
@@ -37,32 +34,33 @@ async function setupMediaForm() {
       }
   });
   // Инициализация отображения полей
-  toggleMessageFields();
+  toggleMediaTypes();
 }
 
 
 
 // Переключение отображения полей диалога и сообщения
-function toggleMessageFields() {
+function toggleMediaTypes() {
   const mediaType = document.getElementById("mediaType").value;
-  const dialogGroup = document
-    .getElementById("dialogId")
-    .closest(".form-group");
   const messageGroup = document
     .getElementById("messageId")
     .closest(".form-group");
+  const getFileButton = document.getElementById("getFile");
+  switch (mediaType) {
+    case "picture":
+      messageGroup.classList.add("hidden");
+      getFileButton.classList.remove("hidden");
+      break;
 
-  if (mediaType === "picture") {
-    dialogGroup.classList.add("hidden");
-    messageGroup.classList.add("hidden");
-  } else {
-    dialogGroup.classList.remove("hidden");
-    messageGroup.classList.remove("hidden");
+    case "voice":
+      messageGroup.classList.remove("hidden");
+      getFileButton.classList.add("hidden");
+      break;
   }
 }
 
-// Получение данных диалога с активной страницы
-async function getDialogData() {
+// Получение данных диалога
+async function getMessageData() {
   try {
     const [tab] = await browser.tabs.query({
       active: true,
@@ -74,7 +72,20 @@ async function getDialogData() {
         const chatName = document
           .querySelector(".ConvoTitle__title h2")
           .textContent.trim();
-        return { chatName };
+
+        // Ищем ID сообщения  в элементах страницы
+        const messageElements = document
+          .querySelector(".ConvoHistory__messageBlockSelected--withoutBubbles")
+          ?.closest(".VirtualScrollItem");
+        if (!messageElements) {
+          return { messageId: null };
+        }
+
+        const messageId = messageElements.getAttribute("data-itemkey");
+        console.log(messageId);
+        const audioUrl = messageElements.querySelector(".vkEnhancerDownloadAudioButton")?.href;
+        console.log(audioUrl);
+        return { messageId, chatName, audioUrl };
       },
     });
 
@@ -89,50 +100,27 @@ async function getDialogData() {
         "error"
       );
     }
-  } catch (error) {
-    console.error("Ошибка при получении ID диалога:", error);
-    showStatus("Произошла ошибка при получении ID диалога.", "error");
-  }
-}
-
-// Получение ID сообщения с активной страницы
-async function getMessageData() {
-  try {
-    const [tab] = await browser.tabs.query({
-      active: true,
-    });
-
-    const results = await browser.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: () => {
-        // Ищем ID сообщения  в элементах страницы
-        const messageElements = document
-          .querySelector(".ConvoHistory__messageBlockSelected--withoutBubbles")
-          ?.closest(".VirtualScrollItem");
-        if (!messageElements) {
-          return { messageId: null };
-        }
-
-        const messageId = messageElements.getAttribute("data-itemkey");
-        console.log(messageId);
-        return { messageId };
-      },
-    });
-
-    const result = results[0].result;
-
     if (result.messageId) {
       document.getElementById("messageId").value = result.messageId;
       showStatus("ID сообщения получен", "success");
     } else {
       showStatus(
-        "Не удалось получить ID сообщения. Попробуйте кликнуть на сообщение или перейти по ссылке на сообщение.",
+        "Не удалось получить ID сообщения. Попробуйте выделить сообщение.",
+        "error"
+      );
+    }
+    if (result.audioUrl){
+      document.getElementById('mediaUrl').value = result.audioUrl;
+      showStatus("URL аудио получен", "success");
+    }else {
+      showStatus(
+        "Не удалось получить аудио. Проверьте, установлено ли расширение VKTools.",
         "error"
       );
     }
   } catch (error) {
-    console.error("Ошибка при получении ID сообщения:", error);
-    showStatus("Произошла ошибка при получении ID сообщения.", "error");
+    console.error("Ошибка при получении данных сообщения:", error);
+    showStatus("Произошла ошибка при получении данных", "error");
   }
 }
 
@@ -263,8 +251,7 @@ function clearMediaForm() {
 // Экспорт функций для использования в popup.js
 window.mediaModule = {
   setupMediaForm,
-  toggleMessageFields,
-  getDialogData,
+  toggleMediaTypes,
   getMessageData,
   addMediaFile,
   clearMediaForm,
