@@ -64,14 +64,14 @@ function setupTabs() {
 
 // Показ статуса
 function showStatus(message, type) {
-  const statusElement = document.getElementById("status");
-  statusElement.textContent = message;
-  statusElement.className = `status ${type}`;
-  statusElement.style.display = "block";
-
+  const statusElement = document.getElementById("status-box");
+  const status = document.createElement("div");
+  status.textContent = message;
+  status.className = `status ${type}`;
+  statusElement.appendChild(status);
   setTimeout(() => {
-    statusElement.style.display = "none";
-  }, 2000);
+    statusElement.removeChild(status);
+  }, 3000);
 }
 
 window.showStatus = showStatus;

@@ -183,15 +183,29 @@ body {
     gap: 5px;
   }
   
-  .status {
-    position: absolute;
-    right: 0;
+  #status-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 5px;
+    position: fixed; /* Фиксированное позиционирование */
+    bottom: 0;       /* Привязка к низу страницы */
     left: 0;
-    bottom: 5px;
+    right: 0;
+    padding: 5px;
+    box-sizing: border-box;
+    z-index: 1000;   /* Высокий z-index для отображения поверх */
+    background: transparent; /* Прозрачный фон */
+    pointer-events: none; /* Чтобы не блокировал клики */
+  }
+
+  .status {
     margin: 5px;
-    padding: 10px;
+    padding: 5px;
     border-radius: 4px;
     font-size: 14px;
+    width: auto; 
   }
   
   .status.success {
