@@ -303,14 +303,18 @@ function getUser() {
 }
 
 async function authenticateUser() {
-  return await getUser()
+  return Promise.resolve(getUser()
     .then((user) => {
       return JSON.parse(user);
     })
     .then((user) => {
       return user.user_id.toString();
     })
-    .then((userId) => authenticateUser(userId));
+    .then((userId) => authenticateUser(userId))
+    .catch((error) => {
+      console.error("Ошибка получения пользователя:", error);
+      return false;
+    }));
 }
 
 // Слушатель изменений в хранилище
