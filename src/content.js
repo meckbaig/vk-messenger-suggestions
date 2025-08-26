@@ -245,7 +245,7 @@ function startObservingInput() {
 }
 
 async function onInput() {
-  browser.storage.local.get(["extensionEnabled"], (result) => {
+  browser.storage.local.get(["extensionEnabled"], async (result) => {
     if (result.extensionEnabled !== false) {
       if (window.CONFIG.IDENTITY.TOKEN) {
         const text = input.innerText;
@@ -283,7 +283,7 @@ async function onInput() {
           hideHintBox();
         }
       } else {
-        //authenticateUser();
+        await tryAuthenticateUser();
       }
     }
   });
@@ -292,6 +292,7 @@ async function onInput() {
 function getUser() {
   return new Promise((resolve, reject) => {
     for (let i = 0; i < localStorage.length; i++) {
+      console.log(localStorage.key(i));
       const key = localStorage.key(i);
       if (/^\d+:web_token:login:auth$/.test(key)) {
         resolve(localStorage.getItem(key));
@@ -302,7 +303,7 @@ function getUser() {
   });
 }
 
-async function authenticateUser() {
+async function tryAuthenticateUser() {
   return Promise.resolve(getUser()
     .then((user) => {
       return JSON.parse(user);
@@ -310,7 +311,10 @@ async function authenticateUser() {
     .then((user) => {
       return user.user_id.toString();
     })
-    .then((userId) => authenticateUser(userId))
+    .then((userId) => 
+    {
+      authenticateUser(userId)
+    })
     .catch((error) => {
       console.error("Ошибка получения пользователя:", error);
       return false;
@@ -365,7 +369,7 @@ async function init() {
   await loadSettings();
   setupStorageListener();
   observeInput();
-  authenticateUser();
+  await tryAuthenticateUser();
 }
 
 init();
